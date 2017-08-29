@@ -1,4 +1,4 @@
-function execute(opcode: number) {
+export function execute(opcode: number) {
     switch (opcode) {
         default:
             console.warn(`Unknown opcode: ${opcode}`);

@@ -1,0 +1,19 @@
+{
+  "name": "chip-type-8",
+  "version": "0.0.1",
+  "description": "chip-8 interpreter",
+  "main": "chip.js",
+  "author": "Kalle Lämsä",
+  "license": "MIT",
+  "scripts": {
+    "watch": "webpack --watch",
+    "copy": "cp src/*.html dist/"
+  },
+  "devDependencies": {
+    "ts-loader": "^2.3.4"
+  },
+  "dependencies": {
+    "global": "^4.3.2",
+    "webpack": "^3.5.5"
+  }
+}
