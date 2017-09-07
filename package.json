@@ -10,6 +10,7 @@
     "copy": "cp src/*.html dist/"
   },
   "devDependencies": {
+    "prettier": "^1.6.1",
     "ts-loader": "^2.3.4"
   },
   "dependencies": {
