@@ -1,9 +1,9 @@
 /**
  * Inspects the passed bytes and checks how many unique
  * opcodes there are. This is used for debugging only.
- * @param {Uint8Array} bytes Bytes
+ * @param {Uint16Array} bytes Bytes
  */
-function inspect(bytes: Uint8Array) {
+function inspect(bytes: Uint16Array) {
   const uniqueOpcodes = new Set<number>(bytes);
   console.log(uniqueOpcodes);
 }
@@ -11,9 +11,9 @@ function inspect(bytes: Uint8Array) {
 /**
  * Decodes the the passed array of bytes into opcodes
  * and executes the opcodes
- * @param {Uint8Array} bytes Bytes
+ * @param {Uint16Array} bytes Bytes
  */
-export function load(bytes: Uint8Array) {
+export function load(bytes: Uint16Array) {
   inspect(bytes);
   for (let opcode of bytes) {
     execute(opcode);
@@ -25,9 +25,10 @@ export function load(bytes: Uint8Array) {
  * @param {number} opcode Opcode to be executed
  */
 export function execute(opcode: number) {
+  const hex = opcode.toString(16).toUpperCase();
   switch (opcode) {
     default:
-      console.warn(`Unknown opcode: 0x${opcode.toString(16).toUpperCase()}`);
+      console.warn(`Unknown opcode: 0x${hex} (${opcode})`);
       break;
   }
 }
