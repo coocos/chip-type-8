@@ -10,8 +10,13 @@
     "copy": "cp src/*.html dist/"
   },
   "devDependencies": {
+    "@types/chai": "^4.0.4",
+    "@types/mocha": "^2.2.43",
+    "chai": "^4.1.2",
+    "mocha": "^3.5.1",
     "prettier": "^1.6.1",
-    "ts-loader": "^2.3.4"
+    "ts-loader": "^2.3.4",
+    "ts-node": "^3.3.0"
   },
   "dependencies": {
     "global": "^4.3.2",
