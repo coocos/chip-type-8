@@ -25,6 +25,7 @@ export default class CPU {
   constructor() {
     this.registers = new Uint8Array(0xf);
     this.memory = new Uint8Array(0x1000);
+    this.counter = ROM_START;
   }
 
   /**
@@ -36,13 +37,14 @@ export default class CPU {
     for (let [index, _byte] of bytes.entries()) {
       this.memory[ROM_START + index] = _byte;
     }
+  }
 
-    //Decode and execute opcodes
-    for (let [index, nibble] of this.memory.slice(ROM_START).entries()) {
-      //Opcodes are 16-bits but they are stored in 8-bit slots
-      //so combine the slots before passing them to be executed
-      this.execute((this.memory[index] << 8) | this.memory[index + 1]);
-    }
+  /** Fetches next instruction from memory and executes it */
+  next() {
+    this.execute(
+      (this.memory[this.counter] << 8) | this.memory[this.counter + 1]
+    );
+    this.counter += 2;
   }
 
   /**
@@ -63,10 +65,10 @@ export default class CPU {
         value = opcode & 0x00ff;
         this.registers[register] = value;
         break;
-      case 0x7: //Add nn to register x (0x7nn)
+      case 0x7: //Add nn to register x (0x7xnn)
         register = (opcode & REGISTER_MASK) >> 8;
-        value = opcode & (0x00ff % 255);
-        this.registers[register] += value;
+        value = opcode & 0x00ff;
+        this.registers[register] = (this.registers[register] + value) % 256;
         break;
       case 0x8: //Various register-to-register operations
         const operation = opcode & 0x000f;
@@ -91,7 +93,7 @@ export default class CPU {
           case 0x4: //Add register x to register y - set VF to 1 if carry, 0 if not
             const sum = this.registers[register1] + this.registers[register2];
             if (sum > 255) {
-              this.registers[register1] = sum % 255;
+              this.registers[register1] = sum % 256;
               this.registers[0xf] = 1;
             } else {
               this.registers[register1] = sum;
