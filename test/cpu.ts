@@ -36,4 +36,14 @@ describe("CPU", () => {
     cpu.next();
     expect(cpu.registers[0xd]).to.equal(0x1);
   });
+  it("should assign register to register - 0x8XY0", () => {
+    const cpu = initializeCpu([0x6b, 0xee, 0x8a, 0xb0]);
+    //Set register VA to 0xEE
+    cpu.next();
+    expect(cpu.registers[0xb]).to.equal(0xee);
+    expect(cpu.registers[0xa]).to.equal(0);
+    //Assign register VA to VB
+    cpu.next();
+    expect(cpu.registers[0xa]).to.equal(0xee);
+  });
 });

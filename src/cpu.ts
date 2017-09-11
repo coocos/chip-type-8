@@ -72,10 +72,10 @@ export default class CPU {
         break;
       case 0x8: //Various register-to-register operations
         const operation = opcode & 0x000f;
-        const register1 = opcode & (0x0f00 >> 8);
-        const register2 = opcode & (0x00f0 >> 4);
+        const register1 = (opcode & 0x0f00) >> 8;
+        const register2 = (opcode & 0x00f0) >> 4;
         switch (operation) {
-          case 0x0: //Assign register x to register y (0x8xy0)
+          case 0x0: //Assign register y to register x (0x8xy0)
             this.registers[register1] = this.registers[register2];
             break;
           case 0x1: //Assign register x | register y to register x
