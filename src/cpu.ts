@@ -23,7 +23,7 @@ export default class CPU {
   counter: number;
 
   constructor() {
-    this.registers = new Uint8Array(0xf);
+    this.registers = new Uint8Array(16);
     this.memory = new Uint8Array(0x1000);
     this.counter = ROM_START;
   }
@@ -92,13 +92,8 @@ export default class CPU {
             break;
           case 0x4: //Add register x to register y - set VF to 1 if carry, 0 if not
             const sum = this.registers[register1] + this.registers[register2];
-            if (sum > 255) {
-              this.registers[register1] = sum % 256;
-              this.registers[0xf] = 1;
-            } else {
-              this.registers[register1] = sum;
-              this.registers[0xf] = 0;
-            }
+            this.registers[register1] = sum % 256;
+            this.registers[0xf] = sum >= 256 ? 1 : 0;
             break;
         }
         break;
