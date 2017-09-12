@@ -2,13 +2,20 @@ import CPU from "../src/cpu";
 import { expect } from "chai";
 
 /**
- * Loads passed array of bytes to CPU and returns the CPU
- * @param {Array<number>} bytes Array of bytes
+ * Loads passed array of opcodes to CPU and returns the CPU
+ * @param {Array<number>} opcodes Array of opcodes
  * @return {CPU} Initialized CPU
  */
-function initializeCpu(bytes: Array<number>): CPU {
+function initializeCpu(opcodes: Array<number>): CPU {
+  //Transform 16-bit opcodes to 8-bit bytes so they fit to memory
+  const bytes = opcodes.reduce((bytes, opcode) => {
+    const firstByte = opcode >> 8;
+    const secondByte = opcode & 0x00ff;
+    return new Uint8Array([...bytes, firstByte, secondByte]);
+  }, new Uint8Array([]));
+  //Load bytes to memory
   const cpu = new CPU();
-  cpu.load(new Uint8Array(bytes));
+  cpu.load(bytes);
   return cpu;
 }
 
@@ -16,19 +23,19 @@ describe("CPU", () => {
   it("should initialize memory at proper location", () => {
     //Load instructions to clear screen and check that the instructions
     //were stored the start of the application memory area
-    const cpu = initializeCpu([0x00, 0xe0]);
+    const cpu = initializeCpu([0x00e0]);
     cpu.next();
     expect(cpu.memory[0x200]).to.equal(0x00);
     expect(cpu.memory[0x201]).to.equal(0xe0);
   });
   it("should set register - 0x6XNN", () => {
     //Check setting register VB to 0xFF
-    const cpu = initializeCpu([0x6b, 0xff]);
+    const cpu = initializeCpu([0x6bff]);
     cpu.next();
     expect(cpu.registers[0xb]).to.equal(0xff);
   });
   it("should add to register - 0x7XNN", () => {
-    const cpu = initializeCpu([0x7d, 0xff, 0x7d, 0x02]);
+    const cpu = initializeCpu([0x7dff, 0x7d02]);
     //Add 0xFF to empty register VD and check the register
     cpu.next();
     expect(cpu.registers[0xd]).to.equal(0xff);
@@ -37,7 +44,7 @@ describe("CPU", () => {
     expect(cpu.registers[0xd]).to.equal(0x1);
   });
   it("should assign register to register - 0x8XY0", () => {
-    const cpu = initializeCpu([0x6b, 0xee, 0x8a, 0xb0]);
+    const cpu = initializeCpu([0x6bee, 0x8ab0]);
     //Set register VA to 0xEE
     cpu.next();
     expect(cpu.registers[0xb]).to.equal(0xee);
