@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "watch": "webpack --watch",
-    "test": "npx mocha --require ts-node/register test/*",
+    "test": "mocha --require ts-node/register test/*",
     "copy": "cp src/*.html dist/"
   },
   "devDependencies": {
