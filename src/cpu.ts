@@ -90,10 +90,17 @@ export default class CPU {
             this.registers[register1] =
               this.registers[register1] ^ this.registers[register2];
             break;
-          case 0x4: //Add register x to register y - set VF to 1 if carry, 0 if not
+          case 0x4: //Add register x to register y
             const sum = this.registers[register1] + this.registers[register2];
             this.registers[register1] = sum % 256;
+            //Set VF to 1 if the register value wrapped around, 0 if not
             this.registers[0xf] = sum >= 256 ? 1 : 0;
+            break;
+          case 0x5: //Subtract register y from register x
+            const sub = this.registers[register1] - this.registers[register2];
+            this.registers[register1] = sub < 0 ? 255 + sub : sub;
+            //Set VF to 0 if the register value wrapped around, 1 if not
+            this.registers[0xf] = sub < 0 ? 0 : 1;
             break;
         }
         break;

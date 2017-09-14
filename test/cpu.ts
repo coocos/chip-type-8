@@ -102,4 +102,22 @@ describe("CPU", () => {
     expect(cpu.registers[0xa]).to.equal(0xe2);
     expect(cpu.registers[0xf]).to.equal(0x1);
   });
+  it("should subtract register from register and set the borrow flag", () => {
+    const cpu = initializeCpu([0x6af0, 0x6b01, 0x6cfe, 0x8ab5, 0x8ac5]);
+    //Assign to registers VA, VB and VC
+    cpu.next();
+    cpu.next();
+    cpu.next();
+    expect(cpu.registers[0xa]).to.equal(0xf0);
+    expect(cpu.registers[0xb]).to.equal(0x01);
+    expect(cpu.registers[0xc]).to.equal(0xfe);
+    //Subtract register from register and check that borrow flag is not set
+    cpu.next();
+    expect(cpu.registers[0xa]).to.equal(0xef);
+    expect(cpu.registers[0xf]).to.equal(0x1);
+    //Subtract register frmo register and check that borrow flag is set
+    cpu.next();
+    expect(cpu.registers[0xa]).to.equal(0xf0);
+    expect(cpu.registers[0xf]).to.equal(0x0);
+  });
 });
