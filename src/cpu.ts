@@ -59,6 +59,7 @@ export default class CPU {
     const identifier = opcode >> 12;
     let register;
     let value;
+    let sub;
     switch (identifier) {
       case 0x6: //Set register x to nn (0x6xnn)
         register = (opcode & REGISTER_MASK) >> 8;
@@ -97,8 +98,20 @@ export default class CPU {
             this.registers[0xf] = sum >= 256 ? 1 : 0;
             break;
           case 0x5: //Subtract register y from register x
-            const sub = this.registers[register1] - this.registers[register2];
-            this.registers[register1] = sub < 0 ? 255 + sub : sub;
+            sub = this.registers[register1] - this.registers[register2];
+            this.registers[register1] = sub < 0 ? 256 + sub : sub;
+            //Set VF to 0 if the register value wrapped around, 1 if not
+            this.registers[0xf] = sub < 0 ? 0 : 1;
+            break;
+          case 0x6:
+            //Shift value of register y by one bit and assign it to register x
+            //Store the least significant bit of register y in VF
+            this.registers[register1] = this.registers[register2] >> 1;
+            this.registers[0xf] = this.registers[register2] & 0x1;
+            break;
+          case 0x7: //Subtract register x from register y and assign to register x
+            sub = this.registers[register2] - this.registers[register1];
+            this.registers[register1] = sub < 0 ? 256 + sub : sub;
             //Set VF to 0 if the register value wrapped around, 1 if not
             this.registers[0xf] = sub < 0 ? 0 : 1;
             break;
