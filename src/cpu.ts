@@ -57,7 +57,7 @@ export default class CPU {
 
     //Shift to get the opcode identifying nibble
     const identifier = opcode >> 12;
-    let register;
+    let register, register1, register2;
     let value;
     let sub;
     switch (identifier) {
@@ -73,8 +73,8 @@ export default class CPU {
         break;
       case 0x8: //Various register-to-register operations
         const operation = opcode & 0x000f;
-        const register1 = (opcode & 0x0f00) >> 8;
-        const register2 = (opcode & 0x00f0) >> 4;
+        register1 = (opcode & 0x0f00) >> 8;
+        register2 = (opcode & 0x00f0) >> 4;
         switch (operation) {
           case 0x0: //Assign register y to register x (0x8xy0)
             this.registers[register1] = this.registers[register2];
@@ -104,7 +104,7 @@ export default class CPU {
             this.registers[0xf] = sub < 0 ? 0 : 1;
             break;
           case 0x6:
-            //Shift value of register y by one bit and assign it to register x
+            //Shift value of register y right by one bit and assign it to register x
             //Store the least significant bit of register y in VF
             this.registers[register1] = this.registers[register2] >> 1;
             this.registers[0xf] = this.registers[register2] & 0x1;
@@ -115,6 +115,19 @@ export default class CPU {
             //Set VF to 0 if the register value wrapped around, 1 if not
             this.registers[0xf] = sub < 0 ? 0 : 1;
             break;
+          case 0xe:
+            //Shift value of register y left by one bit and assign it to register x
+            //Store the most significant bit of register y in VF
+            this.registers[register1] = (this.registers[register2] << 1) & 0xff;
+            this.registers[0xf] = this.registers[register2] >> 7;
+            break;
+        }
+        break;
+      case 0x9: //Skip next opcode if register x does not equal register y
+        register1 = (opcode & 0x0f00) >> 8;
+        register2 = (opcode & 0x00f0) >> 4;
+        if (this.registers[register1] !== this.registers[register2]) {
+          this.counter += 2;
         }
         break;
       default:

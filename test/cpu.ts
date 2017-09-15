@@ -141,14 +141,40 @@ describe("CPU", () => {
     expect(cpu.registers[0xa]).to.equal(0xff);
     expect(cpu.registers[0xf]).to.equal(0x0);
   });
-  it("should shift register by one bit and assign it to another register", () => {
-    //Assign to register VA and VB
-    const cpu = initializeCpu([0x6aff, 0x6bee, 0x8ab6]);
-    times(2, () => cpu.next());
+  it("should shift register right by one bit and assign it to another register", () => {
+    const cpu = initializeCpu([0x6bee, 0x8ab6, 0x6bff, 0x8ab6]);
     //Shift value register VB to the right by 1 bit and and store it in register
     //VA - set register VF to the least significant bit before the shift
-    cpu.next();
+    times(2, () => cpu.next());
     expect(cpu.registers[0xa]).to.equal(0x77);
     expect(cpu.registers[0xf]).to.equal(0x0);
+    times(2, () => cpu.next());
+    expect(cpu.registers[0xa]).to.equal(0x7f);
+    expect(cpu.registers[0xf]).to.equal(0x1);
+  });
+  it("should shift register left by one bit and assign it to another register", () => {
+    const cpu = initializeCpu([0x6bee, 0x8abe, 0x6b7f, 0x8abe]);
+    //Shift value register VB to the left by 1 bit and and store it in register
+    //VA - set register VF to the most significant bit before the shift
+    times(2, () => cpu.next());
+    expect(cpu.registers[0xa]).to.equal(0xdc);
+    expect(cpu.registers[0xf]).to.equal(0x1);
+    times(2, () => cpu.next());
+    expect(cpu.registers[0xa]).to.equal(0xfe);
+    expect(cpu.registers[0xf]).to.equal(0x0);
+  });
+  it("should skip next instruction if register x does not equal register y", () => {
+    const cpu = initializeCpu([0x6aff, 0x6bff, 0x9ab0, 0x6bfe, 0x9ab0]);
+    //Check that upon initialization the program counter is at the right address
+    expect(cpu.counter).to.be.equal(0x200);
+    //Check after register assignments that the program counter is correct
+    times(2, () => cpu.next());
+    expect(cpu.counter).to.be.equal(0x204);
+    //Check that the conditional did not occur since the registers are equal
+    cpu.next();
+    expect(cpu.counter).to.be.equal(0x206);
+    //Set registers to be unequal and check that skip occurs
+    times(2, () => cpu.next());
+    expect(cpu.counter).to.be.equal(0x20c);
   });
 });
