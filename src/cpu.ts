@@ -10,22 +10,26 @@ const REGISTER_MASK = 0x0f00;
 
 export default class CPU {
   /** Sixteen 8-bit registers named V0 to VF */
-  registers: Uint8Array;
+  readonly registers: Uint8Array;
 
   /**
-     * CHIP-8 has 4 kilobytes of memory, but the the first 512
-     * bytes are traditionally reserved for the interpreter itself
-     * so usually programs should be loaded starting from 0x200.
-     */
-  memory: Uint8Array;
+   * CHIP-8 has 4 kilobytes of memory, but the the first 512
+   * bytes are traditionally reserved for the interpreter itself
+   * so usually programs should be loaded starting from 0x200.
+   */
+  readonly memory: Uint8Array;
 
   /** Program counter, i.e. the current instruction address */
   counter: number;
+
+  /** 16-bit address register - often referred by just I */
+  address: number;
 
   constructor() {
     this.registers = new Uint8Array(16);
     this.memory = new Uint8Array(0x1000);
     this.counter = ROM_START;
+    this.address = 0;
   }
 
   /**
@@ -56,22 +60,22 @@ export default class CPU {
     const hex = opcode.toString(16).toUpperCase();
 
     //Shift to get the opcode identifying nibble
-    const identifier = opcode >> 12;
+    const identifier = opcode & 0xf000;
     let register, register1, register2;
     let value;
     let sub;
     switch (identifier) {
-      case 0x6: //Set register x to nn (0x6xnn)
+      case 0x6000: //Set register x to nn (0x6xnn)
         register = (opcode & REGISTER_MASK) >> 8;
         value = opcode & 0x00ff;
         this.registers[register] = value;
         break;
-      case 0x7: //Add nn to register x (0x7xnn)
+      case 0x7000: //Add nn to register x (0x7xnn)
         register = (opcode & REGISTER_MASK) >> 8;
         value = opcode & 0x00ff;
         this.registers[register] = (this.registers[register] + value) % 256;
         break;
-      case 0x8: //Various register-to-register operations
+      case 0x8000: //Various register-to-register operations
         const operation = opcode & 0x000f;
         register1 = (opcode & 0x0f00) >> 8;
         register2 = (opcode & 0x00f0) >> 4;
@@ -123,12 +127,16 @@ export default class CPU {
             break;
         }
         break;
-      case 0x9: //Skip next opcode if register x does not equal register y
+      case 0x9000: //Skip next opcode if register x does not equal register y
         register1 = (opcode & 0x0f00) >> 8;
         register2 = (opcode & 0x00f0) >> 4;
         if (this.registers[register1] !== this.registers[register2]) {
           this.counter += 2;
         }
+        break;
+      case 0xa000: //Assign value to address register
+        let address = opcode & 0x0fff;
+        this.address = address;
         break;
       default:
         console.warn(`Unknown opcode: 0x${hex} (${opcode})`);

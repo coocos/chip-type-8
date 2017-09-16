@@ -177,4 +177,10 @@ describe("CPU", () => {
     times(2, () => cpu.next());
     expect(cpu.counter).to.be.equal(0x20c);
   });
+  it("should set address register", () => {
+    const cpu = initializeCpu([0xa123]);
+    expect(cpu.address).to.be.equal(0x0);
+    cpu.next();
+    expect(cpu.address).to.be.equal(0x123);
+  });
 });
