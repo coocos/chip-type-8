@@ -48,6 +48,10 @@ export default class CPU {
     this.execute(
       (this.memory[this.counter] << 8) | this.memory[this.counter + 1]
     );
+  }
+
+  /** Increment program counter by two memory slots / single opcode */
+  incrementCounter() {
     this.counter += 2;
   }
 
@@ -65,20 +69,30 @@ export default class CPU {
     let value;
     let sub;
     switch (identifier) {
+      case 0x1000: //Jump to address
+        this.counter = opcode & 0x0fff;
+        break;
       case 0x6000: //Set register x to nn (0x6xnn)
         register = (opcode & REGISTER_MASK) >> 8;
         value = opcode & 0x00ff;
         this.registers[register] = value;
+        this.incrementCounter();
         break;
       case 0x7000: //Add nn to register x (0x7xnn)
         register = (opcode & REGISTER_MASK) >> 8;
         value = opcode & 0x00ff;
         this.registers[register] = (this.registers[register] + value) % 256;
+        this.incrementCounter();
         break;
       case 0x8000: //Various register-to-register operations
         const operation = opcode & 0x000f;
         register1 = (opcode & 0x0f00) >> 8;
         register2 = (opcode & 0x00f0) >> 4;
+        //It should be safe to increment program counter already here
+        //for all sub operations since they do not modify the
+        //the program counter
+        this.incrementCounter();
+
         switch (operation) {
           case 0x0: //Assign register y to register x (0x8xy0)
             this.registers[register1] = this.registers[register2];
@@ -131,12 +145,19 @@ export default class CPU {
         register1 = (opcode & 0x0f00) >> 8;
         register2 = (opcode & 0x00f0) >> 4;
         if (this.registers[register1] !== this.registers[register2]) {
-          this.counter += 2;
+          this.incrementCounter();
         }
+        this.incrementCounter();
         break;
       case 0xa000: //Assign value to address register
         let address = opcode & 0x0fff;
         this.address = address;
+        this.incrementCounter();
+        break;
+      case 0xb000: //Jump to address formed by adding value and register 0
+        value = opcode & 0x0fff;
+        //Handle 16-bit wrap arounds
+        this.counter = (value + this.registers[0]) % 0x10000;
         break;
       default:
         console.warn(`Unknown opcode: 0x${hex} (${opcode})`);

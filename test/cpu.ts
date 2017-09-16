@@ -39,7 +39,7 @@ describe("CPU", () => {
     expect(cpu.memory[0x200]).to.equal(0x00);
     expect(cpu.memory[0x201]).to.equal(0xe0);
   });
-  it("should set register", () => {
+  it("should set value to register", () => {
     //Check setting register VB to 0xFF
     const cpu = initializeCpu([0x6bff]);
     cpu.next();
@@ -177,10 +177,28 @@ describe("CPU", () => {
     times(2, () => cpu.next());
     expect(cpu.counter).to.be.equal(0x20c);
   });
-  it("should set address register", () => {
+  it("should set value to address register", () => {
     const cpu = initializeCpu([0xa123]);
     expect(cpu.address).to.be.equal(0x0);
     cpu.next();
     expect(cpu.address).to.be.equal(0x123);
+  });
+  it("should jump to address formed by adding value and register 0", () => {
+    const cpu = initializeCpu([0xb204, 0x0, 0x60ff, 0xb2ff]);
+    //Check that jumping works when register 0 is empty
+    cpu.next();
+    expect(cpu.counter).to.be.equal(0x204);
+    //Check that jumping works when register 0 is not empty
+    times(2, () => cpu.next());
+    expect(cpu.registers[0x0]).to.be.equal(0xff);
+    expect(cpu.counter).to.be.equal(0x2ff + 0xff);
+  });
+  it("should jump to address", () => {
+    const cpu = initializeCpu([0x1206, 0x0, 0x0, 0x60ff]);
+    times(2, () => cpu.next());
+    //Check that program counter has jumped over 2 instructions
+    expect(cpu.counter).to.be.equal(0x208);
+    //Check that the last instruction was executed
+    expect(cpu.registers[0x0]).to.be.equal(0xff);
   });
 });
