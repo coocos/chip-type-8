@@ -72,13 +72,37 @@ export default class CPU {
       case 0x1000: //Jump to address
         this.counter = opcode & 0x0fff;
         break;
-      case 0x6000: //Set register x to nn (0x6xnn)
+      case 0x3000: //Skip next instruction if register is equal to value
+        register = (opcode & REGISTER_MASK) >> 8;
+        value = opcode & 0x00ff;
+        if (this.registers[register] === value) {
+          this.incrementCounter();
+        }
+        this.incrementCounter();
+        break;
+      case 0x4000: //Skip next instruction if register not equal to value
+        register = (opcode & REGISTER_MASK) >> 8;
+        value = opcode & 0x00ff;
+        if (this.registers[register] !== value) {
+          this.incrementCounter();
+        }
+        this.incrementCounter();
+        break;
+      case 0x5000: //Skip next instruction if register x equals register y
+        register1 = (opcode & 0x0f00) >> 8;
+        register2 = (opcode & 0x00f0) >> 4;
+        if (this.registers[register1] === this.registers[register2]) {
+          this.incrementCounter();
+        }
+        this.incrementCounter();
+        break;
+      case 0x6000: //Set register x to value (0x6xnn)
         register = (opcode & REGISTER_MASK) >> 8;
         value = opcode & 0x00ff;
         this.registers[register] = value;
         this.incrementCounter();
         break;
-      case 0x7000: //Add nn to register x (0x7xnn)
+      case 0x7000: //Add value to register x (0x7xnn)
         register = (opcode & REGISTER_MASK) >> 8;
         value = opcode & 0x00ff;
         this.registers[register] = (this.registers[register] + value) % 256;
@@ -141,7 +165,7 @@ export default class CPU {
             break;
         }
         break;
-      case 0x9000: //Skip next opcode if register x does not equal register y
+      case 0x9000: //Skip next instruction if register x does not equal register y
         register1 = (opcode & 0x0f00) >> 8;
         register2 = (opcode & 0x00f0) >> 4;
         if (this.registers[register1] !== this.registers[register2]) {

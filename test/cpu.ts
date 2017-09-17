@@ -177,6 +177,36 @@ describe("CPU", () => {
     times(2, () => cpu.next());
     expect(cpu.counter).to.be.equal(0x20c);
   });
+  it("should skip next instruction if register x equals registers y", () => {
+    const cpu = initializeCpu([0x6aff, 0x6bfe, 0x5ab0, 0x6bff, 0x5ab0]);
+    //Check after register assignments that the program counter is correct
+    times(2, () => cpu.next());
+    expect(cpu.counter).to.be.equal(0x204);
+    //Check that the skip did not occur since the registers are not equal
+    cpu.next();
+    expect(cpu.counter).to.be.equal(0x206);
+    //Set registers to be equal and check that skip occurs
+    times(2, () => cpu.next());
+    expect(cpu.counter).to.be.equal(0x20c);
+  });
+  it("should skip next instruction if register equals value", () => {
+    const cpu = initializeCpu([0x6aff, 0x3aff, 0x0, 0x3afe]);
+    //Check that the CPU skipped the third instruction
+    times(2, () => cpu.next());
+    expect(cpu.counter).to.be.equal(0x206);
+    //Check that the CPU did not skip - register does not match the value
+    cpu.next();
+    expect(cpu.counter).to.be.equal(0x208);
+  });
+  it("should skip next instruction if register does not equal value", () => {
+    const cpu = initializeCpu([0x6aff, 0x4afe, 0x0, 0x4aff]);
+    //Check that the CPU skipped the third instruction
+    times(2, () => cpu.next());
+    expect(cpu.counter).to.be.equal(0x206);
+    //Check that the CPU did not skip - register does match the value
+    cpu.next();
+    expect(cpu.counter).to.be.equal(0x208);
+  });
   it("should set value to address register", () => {
     const cpu = initializeCpu([0xa123]);
     expect(cpu.address).to.be.equal(0x0);
