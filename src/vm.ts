@@ -8,7 +8,14 @@ const ROM_START = 0x200;
  */
 const REGISTER_MASK = 0x0f00;
 
-export default class CPU {
+/**
+ * Clock speed for executing instructions. CHIP-8 does not have a specified
+ * clock speed but executing 500 - 600 instructions per second is said to
+ * to provide a decent experience.
+ */
+const CLOCKSPEED = 600;
+
+export default class VM {
   /** Sixteen 8-bit registers named V0 to VF */
   readonly registers: Uint8Array;
 
