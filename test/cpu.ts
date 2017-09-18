@@ -239,4 +239,27 @@ describe("CPU", () => {
       expect(cpu.registers[0x0]).to.be.equal(0xff);
     });
   });
+  describe("timer instructions", () => {
+    it("should assign register value to delay timer", () => {
+      const cpu = initializeCpu([0x6a3c, 0xfa15]);
+      expect(cpu.delayTimer).to.be.equal(0x0);
+      times(2, () => cpu.next());
+      expect(cpu.registers[0xa]).to.be.equal(0x3c);
+      expect(cpu.delayTimer).to.be.equal(cpu.registers[0xa]);
+    });
+    it("should assign register value to sound timer", () => {
+      const cpu = initializeCpu([0x6a3c, 0xfa18]);
+      expect(cpu.soundTimer).to.be.equal(0x0);
+      times(2, () => cpu.next());
+      expect(cpu.registers[0xa]).to.be.equal(0x3c);
+      expect(cpu.soundTimer).to.be.equal(cpu.registers[0xa]);
+    });
+    it("should assign delay timer value to register", () => {
+      const cpu = initializeCpu([0x6a0f, 0xfa15, 0xfb07]);
+      expect(cpu.registers[0xb]).to.be.equal(0x0);
+      times(3, () => cpu.next());
+      expect(cpu.registers[0xa]).to.be.equal(0x0f);
+      expect(cpu.registers[0xb]).to.be.equal(cpu.delayTimer);
+    });
+  });
 });

@@ -25,11 +25,17 @@ export default class CPU {
   /** 16-bit address register - often referred by just I */
   address: number;
 
+  /** Timers running at 60 hertz - will decrement until 0 */
+  delayTimer: number;
+  soundTimer: number;
+
   constructor() {
     this.registers = new Uint8Array(16);
     this.memory = new Uint8Array(0x1000);
     this.counter = ROM_START;
     this.address = 0;
+    this.delayTimer = 0;
+    this.soundTimer = 0;
   }
 
   /**
@@ -66,7 +72,7 @@ export default class CPU {
     //Shift to get the opcode identifying nibble
     const identifier = opcode & 0xf000;
     let register, register1, register2;
-    let value;
+    let value, operation;
     let sub;
     switch (identifier) {
       case 0x1000: //Jump to address
@@ -109,7 +115,7 @@ export default class CPU {
         this.incrementCounter();
         break;
       case 0x8000: //Various register-to-register operations
-        const operation = opcode & 0x000f;
+        operation = opcode & 0x000f;
         register1 = (opcode & 0x0f00) >> 8;
         register2 = (opcode & 0x00f0) >> 4;
         //It should be safe to increment program counter already here
@@ -182,6 +188,25 @@ export default class CPU {
         value = opcode & 0x0fff;
         //Handle 16-bit wrap arounds
         this.counter = (value + this.registers[0]) % 0x10000;
+        break;
+      case 0xf000: //Miscellaneous instructions including sound and input
+        operation = opcode & 0x00ff;
+        register = (opcode & 0x0f00) >> 8;
+        this.incrementCounter();
+        switch (operation) {
+          case 0x07: //Assign delay timer value to register
+            this.registers[register] = this.delayTimer;
+            break;
+          case 0x15: //Assign register value to delay timer
+            this.delayTimer = this.registers[register];
+            break;
+          case 0x18: //Assign register value to sound timer
+            this.soundTimer = this.registers[register];
+            break;
+          default:
+            console.warn(`Unknown opcode: 0x${hex} (${opcode})`);
+            break;
+        }
         break;
       default:
         console.warn(`Unknown opcode: 0x${hex} (${opcode})`);
