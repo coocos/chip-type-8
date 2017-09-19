@@ -56,6 +56,26 @@ export default class VM {
     }
   }
 
+  /**
+   * Executes a single "tick" of the virtual machine. This is meant to be
+   * called at 60 times per second because it will decrement the timers which
+   * run at 60 hertz. CHIP-8 does does not define a clock speed so in this
+   * virtual machine a single tick will execute around 10 instructions, i.e.
+   * ~600 instructions per second.
+   */
+  tick() {
+    if (this.delayTimer > 0) {
+      this.delayTimer--;
+    }
+    if (this.soundTimer > 0) {
+      this.soundTimer--;
+    }
+    //Execute multiple instructions
+    for (let _ = 0; _ < Math.round(CLOCKSPEED / 60); _++) {
+      this.next();
+    }
+  }
+
   /** Fetches next instruction from memory and executes it */
   next() {
     this.execute(
