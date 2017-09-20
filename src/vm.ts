@@ -1,12 +1,7 @@
+import * as instructions from "./instructions";
+
 /** ROMs loaded to memory start at 512 bytes in so at 0x200 */
 const ROM_START = 0x200;
-
-/**
- * Bit mask for conveniently extracting the register from
- * instructions like 0x6F00 where the F is the identifier
- * of the register
- */
-const REGISTER_MASK = 0x0f00;
 
 /**
  * Clock speed for executing instructions. CHIP-8 does not have a specified
@@ -103,132 +98,30 @@ export default class VM {
     let sub;
     switch (identifier) {
       case 0x1000: //Jump to address
-        this.counter = opcode & 0x0fff;
+      case 0xb000: //Jump to address formed by adding value and register 0
+        instructions.jump(opcode, this);
         break;
       case 0x3000: //Skip next instruction if register is equal to value
-        register = (opcode & REGISTER_MASK) >> 8;
-        value = opcode & 0x00ff;
-        if (this.registers[register] === value) {
-          this.incrementCounter();
-        }
-        this.incrementCounter();
-        break;
       case 0x4000: //Skip next instruction if register not equal to value
-        register = (opcode & REGISTER_MASK) >> 8;
-        value = opcode & 0x00ff;
-        if (this.registers[register] !== value) {
-          this.incrementCounter();
-        }
-        this.incrementCounter();
-        break;
       case 0x5000: //Skip next instruction if register x equals register y
-        register1 = (opcode & 0x0f00) >> 8;
-        register2 = (opcode & 0x00f0) >> 4;
-        if (this.registers[register1] === this.registers[register2]) {
-          this.incrementCounter();
-        }
-        this.incrementCounter();
-        break;
-      case 0x6000: //Set register x to value (0x6xnn)
-        register = (opcode & REGISTER_MASK) >> 8;
-        value = opcode & 0x00ff;
-        this.registers[register] = value;
-        this.incrementCounter();
-        break;
-      case 0x7000: //Add value to register x (0x7xnn)
-        register = (opcode & REGISTER_MASK) >> 8;
-        value = opcode & 0x00ff;
-        this.registers[register] = (this.registers[register] + value) % 256;
-        this.incrementCounter();
-        break;
-      case 0x8000: //Various register-to-register operations
-        operation = opcode & 0x000f;
-        register1 = (opcode & 0x0f00) >> 8;
-        register2 = (opcode & 0x00f0) >> 4;
-        //It should be safe to increment program counter already here
-        //for all sub operations since they do not modify the
-        //the program counter
-        this.incrementCounter();
-
-        switch (operation) {
-          case 0x0: //Assign register y to register x (0x8xy0)
-            this.registers[register1] = this.registers[register2];
-            break;
-          case 0x1: //Assign register x | register y to register x
-            this.registers[register1] =
-              this.registers[register1] | this.registers[register2];
-            break;
-          case 0x2: //Assign register x & register y to register x
-            this.registers[register1] =
-              this.registers[register1] & this.registers[register2];
-            break;
-          case 0x3: //Assign register x ^ register y to register x
-            this.registers[register1] =
-              this.registers[register1] ^ this.registers[register2];
-            break;
-          case 0x4: //Add register x to register y
-            const sum = this.registers[register1] + this.registers[register2];
-            this.registers[register1] = sum % 256;
-            //Set VF to 1 if the register value wrapped around, 0 if not
-            this.registers[0xf] = sum >= 256 ? 1 : 0;
-            break;
-          case 0x5: //Subtract register y from register x
-            sub = this.registers[register1] - this.registers[register2];
-            this.registers[register1] = sub < 0 ? 256 + sub : sub;
-            //Set VF to 0 if the register value wrapped around, 1 if not
-            this.registers[0xf] = sub < 0 ? 0 : 1;
-            break;
-          case 0x6:
-            //Shift value of register y right by one bit and assign it to register x
-            //Store the least significant bit of register y in VF
-            this.registers[register1] = this.registers[register2] >> 1;
-            this.registers[0xf] = this.registers[register2] & 0x1;
-            break;
-          case 0x7: //Subtract register x from register y and assign to register x
-            sub = this.registers[register2] - this.registers[register1];
-            this.registers[register1] = sub < 0 ? 256 + sub : sub;
-            //Set VF to 0 if the register value wrapped around, 1 if not
-            this.registers[0xf] = sub < 0 ? 0 : 1;
-            break;
-          case 0xe:
-            //Shift value of register y left by one bit and assign it to register x
-            //Store the most significant bit of register y in VF
-            this.registers[register1] = (this.registers[register2] << 1) & 0xff;
-            this.registers[0xf] = this.registers[register2] >> 7;
-            break;
-        }
-        break;
       case 0x9000: //Skip next instruction if register x does not equal register y
-        register1 = (opcode & 0x0f00) >> 8;
-        register2 = (opcode & 0x00f0) >> 4;
-        if (this.registers[register1] !== this.registers[register2]) {
-          this.incrementCounter();
-        }
-        this.incrementCounter();
+        instructions.skip(opcode, this);
         break;
       case 0xa000: //Assign value to address register
-        let address = opcode & 0x0fff;
-        this.address = address;
-        this.incrementCounter();
+      case 0x6000: //Set register x to value
+      case 0x7000: //Add value to register x
+        instructions.register(opcode, this);
         break;
-      case 0xb000: //Jump to address formed by adding value and register 0
-        value = opcode & 0x0fff;
-        //Handle 16-bit wrap arounds
-        this.counter = (value + this.registers[0]) % 0x10000;
+      case 0x8000: //Various register-to-register operations
+        instructions.betweenRegisters(opcode, this);
         break;
       case 0xf000: //Miscellaneous instructions including sound and input
         operation = opcode & 0x00ff;
-        register = (opcode & 0x0f00) >> 8;
-        this.incrementCounter();
         switch (operation) {
           case 0x07: //Assign delay timer value to register
-            this.registers[register] = this.delayTimer;
-            break;
           case 0x15: //Assign register value to delay timer
-            this.delayTimer = this.registers[register];
-            break;
           case 0x18: //Assign register value to sound timer
-            this.soundTimer = this.registers[register];
+            instructions.timer(opcode, this);
             break;
           default:
             console.warn(`Unknown opcode: 0x${hex} (${opcode})`);
