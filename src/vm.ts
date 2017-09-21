@@ -23,6 +23,11 @@ export default class VM {
    */
   readonly memory: Uint8Array;
 
+  /**
+   * Subroutine stack
+   */
+  readonly stack: Array<number>;
+
   /** Program counter, i.e. the current instruction address */
   counter: number;
 
@@ -38,6 +43,7 @@ export default class VM {
     this.memory = new Uint8Array(0x1000);
     this.counter = ROM_START;
     this.address = 0;
+    this.stack = [];
     this.delayTimer = 0;
     this.soundTimer = 0;
   }
@@ -98,6 +104,10 @@ export default class VM {
         case 0x1000: //Jump to address
         case 0xb000: //Jump to address formed by adding value and register 0
           instructions.jump(opcode, this);
+          break;
+        case 0x0000: //Return from subroutine or execute machine language subroutine
+        case 0x2000: //Execute subroutine
+          instructions.subroutine(opcode, this);
           break;
         case 0x3000: //Skip next instruction if register is equal to value
         case 0x4000: //Skip next instruction if register not equal to value

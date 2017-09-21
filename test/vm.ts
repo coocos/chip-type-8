@@ -262,4 +262,22 @@ describe("VM", () => {
       expect(vm.registers[0xb]).to.be.equal(vm.delayTimer);
     });
   });
+  describe("subroutine instructions", () => {
+    it("should execute subroutine at a specific address", () => {
+      const vm = initializeVm([0x2210]);
+      vm.next();
+      expect(vm.counter).to.be.equal(0x210);
+    });
+    it("should execute subroutine and return from subroutine", () => {
+      const vm = initializeVm([0x2206, 0x6aff, 0x6bff, 0x6cff, 0x00ee]);
+      times(2, () => vm.next());
+      expect(vm.counter).to.be.equal(0x208);
+      vm.next();
+      expect(vm.registers[0xc]).to.be.equal(0xff);
+      expect(vm.counter).to.be.equal(0x202);
+      times(2, () => vm.next());
+      expect(vm.registers[0xa]).to.be.equal(0xff);
+      expect(vm.registers[0xb]).to.be.equal(0xff);
+    });
+  });
 });

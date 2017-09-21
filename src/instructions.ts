@@ -1,6 +1,6 @@
 import VM from "./vm";
 import { prettyPrint } from "./utils";
-import { OpcodeError } from "./errors";
+import { OpcodeError, StackError } from "./errors";
 
 const REGISTER_MASK = 0x0f00;
 
@@ -48,7 +48,49 @@ export function skip(opcode: number, vm: VM) {
       break;
     default:
       throw new OpcodeError(
-        `Failed to execute skip instruction: ${prettyPrint(opcode)}`
+        `Failed to decode skip instruction: ${prettyPrint(opcode)}`
+      );
+  }
+}
+
+/**
+ * Decodes instructions for executing subroutines.
+ * @param {number} opcode Opcode / instruction
+ * @param {VM} vm Virtual machine
+ */
+export function subroutine(opcode: number, vm: VM) {
+  //The instruction for returning from a subroutine is the constant 0x00ee
+  //but the other instructions here are not constants - this is just
+  //a not-so-great workaround for handling the constant in the same
+  //switch-case structure as the other instructions
+  const identifier = opcode != 0xee ? opcode & 0xf000 : opcode;
+  switch (identifier) {
+    case 0x0000: //Execute machine language subroutine at address
+      //NOTE: Not implemented by design - this instruction is considered
+      //deprecated.
+      break;
+    case 0x00ee: //Return from subroutine
+      const address = vm.stack.pop();
+      //No subroutine has been called but an attempt to exit a subroutine was
+      //was made - should not happen with a valid CHIP-8 program
+      if (address === undefined) {
+        throw new StackError();
+      }
+      //Restore program execution at the instruction just after the call to
+      //execute a subroutine
+      vm.counter = address;
+      vm.incrementCounter();
+      break;
+    case 0x2000: //Call subroutine at address
+      const subroutineAddress = opcode & 0x0fff;
+      //Push current program counter to the stack and set the counter to
+      //subroutine address specified by the instruction
+      vm.stack.push(vm.counter);
+      vm.counter = subroutineAddress;
+      break;
+    default:
+      throw new OpcodeError(
+        `Failed to decode subroutine instruction: ${prettyPrint(opcode)}`
       );
   }
 }
@@ -72,7 +114,7 @@ export function jump(opcode: number, vm: VM) {
       break;
     default:
       throw new OpcodeError(
-        `Failed to execute jump instruction: ${prettyPrint(opcode)}`
+        `Failed to decode jump instruction: ${prettyPrint(opcode)}`
       );
   }
 }
@@ -98,7 +140,7 @@ export function timer(opcode: number, vm: VM) {
       break;
     default:
       throw new OpcodeError(
-        `Failed to execute timer instruction: ${prettyPrint(opcode)}`
+        `Failed to decode timer instruction: ${prettyPrint(opcode)}`
       );
   }
   vm.incrementCounter();
@@ -165,7 +207,7 @@ export function betweenRegisters(opcode: number, vm: VM) {
       break;
     default:
       throw new OpcodeError(
-        `Failed to execute register instruction: ${prettyPrint(opcode)}`
+        `Failed to decode register instruction: ${prettyPrint(opcode)}`
       );
   }
   vm.incrementCounter();
@@ -193,7 +235,7 @@ export function register(opcode: number, vm: VM) {
       break;
     default:
       throw new OpcodeError(
-        `Failed to execute register instruction: ${prettyPrint(opcode)}`
+        `Failed to decode register instruction: ${prettyPrint(opcode)}`
       );
   }
   vm.incrementCounter();
