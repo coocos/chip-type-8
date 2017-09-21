@@ -1,4 +1,6 @@
 import VM from "./vm";
+import { prettyPrint } from "./utils";
+import { OpcodeError } from "./errors";
 
 const REGISTER_MASK = 0x0f00;
 
@@ -44,6 +46,10 @@ export function skip(opcode: number, vm: VM) {
       }
       vm.incrementCounter();
       break;
+    default:
+      throw new OpcodeError(
+        `Failed to execute skip instruction: ${prettyPrint(opcode)}`
+      );
   }
 }
 
@@ -64,6 +70,10 @@ export function jump(opcode: number, vm: VM) {
       //Handle 16-bit wrap arounds
       vm.counter = (value + vm.registers[0]) % 0x10000;
       break;
+    default:
+      throw new OpcodeError(
+        `Failed to execute jump instruction: ${prettyPrint(opcode)}`
+      );
   }
 }
 
@@ -86,6 +96,10 @@ export function timer(opcode: number, vm: VM) {
     case 0x18: //Assign register value to sound timer
       vm.soundTimer = vm.registers[register];
       break;
+    default:
+      throw new OpcodeError(
+        `Failed to execute timer instruction: ${prettyPrint(opcode)}`
+      );
   }
   vm.incrementCounter();
 }
@@ -102,10 +116,6 @@ export function betweenRegisters(opcode: number, vm: VM) {
   const register1 = (opcode & 0x0f00) >> 8;
   const register2 = (opcode & 0x00f0) >> 4;
   let sub;
-  //It should be safe to increment program counter already here
-  //for all sub operations since they do not modify the
-  //the program counter
-  vm.incrementCounter();
 
   switch (operation) {
     case 0x0: //Assign register y to register x (0x8xy0)
@@ -153,7 +163,12 @@ export function betweenRegisters(opcode: number, vm: VM) {
       vm.registers[register1] = (vm.registers[register2] << 1) & 0xff;
       vm.registers[0xf] = vm.registers[register2] >> 7;
       break;
+    default:
+      throw new OpcodeError(
+        `Failed to execute register instruction: ${prettyPrint(opcode)}`
+      );
   }
+  vm.incrementCounter();
 }
 
 /**
@@ -176,6 +191,10 @@ export function register(opcode: number, vm: VM) {
     case 0x7000: //Add value to register x (0x7xnn)
       vm.registers[register] = (vm.registers[register] + value) % 256;
       break;
+    default:
+      throw new OpcodeError(
+        `Failed to execute register instruction: ${prettyPrint(opcode)}`
+      );
   }
   vm.incrementCounter();
 }

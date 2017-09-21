@@ -33,12 +33,12 @@ function times(count: number, fn: Function) {
 describe("VM", () => {
   describe("general logic", () => {
     it("should initialize memory at proper location", () => {
-      //Load instructions to clear screen and check that the instructions
+      //Load instructions to set register and check that the instructions
       //were stored the start of the application memory area
-      const vm = initializeVm([0x00e0]);
+      const vm = initializeVm([0x6aff]);
       vm.next();
-      expect(vm.memory[0x200]).to.equal(0x00);
-      expect(vm.memory[0x201]).to.equal(0xe0);
+      expect(vm.memory[0x200]).to.equal(0x6a);
+      expect(vm.memory[0x201]).to.equal(0xff);
     });
     it("should set value to address register", () => {
       const vm = initializeVm([0xa123]);

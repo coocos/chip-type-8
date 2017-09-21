@@ -1,4 +1,6 @@
 import * as instructions from "./instructions";
+import { prettyPrint } from "./utils";
+import { OpcodeError } from "./errors";
 
 /** ROMs loaded to memory start at 512 bytes in so at 0x200 */
 const ROM_START = 0x200;
@@ -88,49 +90,54 @@ export default class VM {
    * @param {number} opcode Opcode to be executed
    */
   execute(opcode: number) {
-    //Pretty print opcode
-    const hex = opcode.toString(16).toUpperCase();
-
     //Shift to get the opcode identifying nibble
     const identifier = opcode & 0xf000;
-    let register, register1, register2;
-    let value, operation;
-    let sub;
-    switch (identifier) {
-      case 0x1000: //Jump to address
-      case 0xb000: //Jump to address formed by adding value and register 0
-        instructions.jump(opcode, this);
-        break;
-      case 0x3000: //Skip next instruction if register is equal to value
-      case 0x4000: //Skip next instruction if register not equal to value
-      case 0x5000: //Skip next instruction if register x equals register y
-      case 0x9000: //Skip next instruction if register x does not equal register y
-        instructions.skip(opcode, this);
-        break;
-      case 0xa000: //Assign value to address register
-      case 0x6000: //Set register x to value
-      case 0x7000: //Add value to register x
-        instructions.register(opcode, this);
-        break;
-      case 0x8000: //Various register-to-register operations
-        instructions.betweenRegisters(opcode, this);
-        break;
-      case 0xf000: //Miscellaneous instructions including sound and input
-        operation = opcode & 0x00ff;
-        switch (operation) {
-          case 0x07: //Assign delay timer value to register
-          case 0x15: //Assign register value to delay timer
-          case 0x18: //Assign register value to sound timer
-            instructions.timer(opcode, this);
-            break;
-          default:
-            console.warn(`Unknown opcode: 0x${hex} (${opcode})`);
-            break;
-        }
-        break;
-      default:
-        console.warn(`Unknown opcode: 0x${hex} (${opcode})`);
-        break;
+
+    try {
+      switch (identifier) {
+        case 0x1000: //Jump to address
+        case 0xb000: //Jump to address formed by adding value and register 0
+          instructions.jump(opcode, this);
+          break;
+        case 0x3000: //Skip next instruction if register is equal to value
+        case 0x4000: //Skip next instruction if register not equal to value
+        case 0x5000: //Skip next instruction if register x equals register y
+        case 0x9000: //Skip next instruction if register x does not equal register y
+          instructions.skip(opcode, this);
+          break;
+        case 0xa000: //Assign value to address register
+        case 0x6000: //Set register x to value
+        case 0x7000: //Add value to register x
+          instructions.register(opcode, this);
+          break;
+        case 0x8000: //Various register-to-register operations
+          instructions.betweenRegisters(opcode, this);
+          break;
+        case 0xf000: //Miscellaneous instructions including sound and input
+          let operation = opcode & 0x00ff;
+          switch (operation) {
+            case 0x07: //Assign delay timer value to register
+            case 0x15: //Assign register value to delay timer
+            case 0x18: //Assign register value to sound timer
+              instructions.timer(opcode, this);
+              break;
+            default:
+              throw new OpcodeError(
+                `Failed to execute misc instruction: ${prettyPrint(opcode)}`
+              );
+          }
+          break;
+        default:
+          throw new OpcodeError(
+            `Failed to execute instruction: ${prettyPrint(opcode)}`
+          );
+      }
+    } catch (e) {
+      if (e instanceof OpcodeError) {
+        console.warn(e);
+      } else {
+        throw e;
+      }
     }
   }
 }
