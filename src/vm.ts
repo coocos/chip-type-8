@@ -124,13 +124,16 @@ export default class VM {
         case 0xa000: //Assign value to address register
           instructions.memory(opcode, this);
           break;
-        case 0xf000: //Miscellaneous instructions including sound and input
+        case 0xf000: //Contains a myriad of instructions
           let operation = opcode & 0x00ff;
           switch (operation) {
             case 0x07: //Assign delay timer value to register
             case 0x15: //Assign register value to delay timer
             case 0x18: //Assign register value to sound timer
               instructions.timer(opcode, this);
+              break;
+            case 0x1e: //Assign register to address register
+              instructions.memory(opcode, this);
               break;
             default:
               throw new OpcodeError(

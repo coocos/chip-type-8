@@ -292,5 +292,10 @@ describe("Virtual machine", () => {
       vm.next();
       expect(vm.address).to.be.equal(0x123);
     });
+    it("should add register to address register I", () => {
+      const vm = initializeVm([0x6aff, 0xfa1e]);
+      times(2, () => vm.next());
+      expect(vm.address).to.equal(0xff);
+    });
   });
 });

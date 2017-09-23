@@ -2,7 +2,12 @@ import VM from "./vm";
 import { prettyPrint, randomByte } from "./utils";
 import { OpcodeError, StackError } from "./errors";
 
+/** Bitmask for extracting the register from multiple instructions */
 const REGISTER_MASK = 0x0f00;
+/** Used to wrap numbers since JS does not have unsigned 8-bit integers */
+const EIGHT_BIT_WRAP = 0x100;
+/** Used to wrap numbers since JS does not have unsigned 16-bit integers */
+const SIXTEEN_BIT_WRAP = 0x10000;
 
 /**
  * Decodes instructions related to conditional skipping and updates the state
@@ -177,13 +182,13 @@ export function betweenRegisters(opcode: number, vm: VM) {
       break;
     case 0x4: //Add register x to register y
       const sum = vm.registers[register1] + vm.registers[register2];
-      vm.registers[register1] = sum % 256;
+      vm.registers[register1] = sum % EIGHT_BIT_WRAP;
       //Set VF to 1 if the register value wrapped around, 0 if not
-      vm.registers[0xf] = sum >= 256 ? 1 : 0;
+      vm.registers[0xf] = sum >= EIGHT_BIT_WRAP ? 1 : 0;
       break;
     case 0x5: //Subtract register y from register x
       sub = vm.registers[register1] - vm.registers[register2];
-      vm.registers[register1] = sub < 0 ? 256 + sub : sub;
+      vm.registers[register1] = sub < 0 ? EIGHT_BIT_WRAP + sub : sub;
       //Set VF to 0 if the register value wrapped around, 1 if not
       vm.registers[0xf] = sub < 0 ? 0 : 1;
       break;
@@ -195,7 +200,7 @@ export function betweenRegisters(opcode: number, vm: VM) {
       break;
     case 0x7: //Subtract register x from register y and assign to register x
       sub = vm.registers[register2] - vm.registers[register1];
-      vm.registers[register1] = sub < 0 ? 256 + sub : sub;
+      vm.registers[register1] = sub < 0 ? EIGHT_BIT_WRAP + sub : sub;
       //Set VF to 0 if the register value wrapped around, 1 if not
       vm.registers[0xf] = sub < 0 ? 0 : 1;
       break;
@@ -228,7 +233,8 @@ export function register(opcode: number, vm: VM) {
       vm.registers[register] = value;
       break;
     case 0x7000: //Add value to register x
-      vm.registers[register] = (vm.registers[register] + value) % 256;
+      vm.registers[register] =
+        (vm.registers[register] + value) % EIGHT_BIT_WRAP;
       break;
     case 0xc000: //Set register to bitwise and between value and random number
       vm.registers[register] = opcode & 0x00ff & randomByte();
@@ -248,9 +254,18 @@ export function register(opcode: number, vm: VM) {
  */
 export function memory(opcode: number, vm: VM) {
   const identifier = opcode & 0xf000;
-  switch (identifier) {
-    case 0xa000: //Assign memory address to address register
-      vm.address = opcode & 0x0fff;
-      break;
+
+  if (identifier === 0xa000) {
+    //Assign memory address to address register I
+    vm.address = opcode & 0x0fff;
+  } else if ((opcode & 0xf0ff) === 0xf01e) {
+    //Add register value to address register I
+    const register = (opcode & 0x0f00) >> 8;
+    const newAddress = vm.address + vm.registers[register];
+    vm.address = newAddress % SIXTEEN_BIT_WRAP;
+  } else {
+    throw new OpcodeError(
+      `Failed to decode memory instruction: ${prettyPrint(opcode)}`
+    );
   }
 }
