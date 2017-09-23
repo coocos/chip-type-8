@@ -224,9 +224,6 @@ export function register(opcode: number, vm: VM) {
   const register = (opcode & REGISTER_MASK) >> 8;
   const value = opcode & 0x00ff;
   switch (instruction) {
-    case 0xa000: //Assign memory address to address register
-      vm.address = opcode & 0x0fff;
-      break;
     case 0x6000: //Set register x to value
       vm.registers[register] = value;
       break;
@@ -242,4 +239,18 @@ export function register(opcode: number, vm: VM) {
       );
   }
   vm.incrementCounter();
+}
+
+/**
+ * Decodes instructions related to the address register I
+ * @param {number} opcode Opcode / instruction
+ * @param {VM} vm Virtual machine
+ */
+export function memory(opcode: number, vm: VM) {
+  const identifier = opcode & 0xf000;
+  switch (identifier) {
+    case 0xa000: //Assign memory address to address register
+      vm.address = opcode & 0x0fff;
+      break;
+  }
 }

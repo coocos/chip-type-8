@@ -33,7 +33,7 @@ function times(count: number, fn: Function) {
   }
 }
 
-describe("VM", () => {
+describe("Virtual machine", () => {
   describe("general logic", () => {
     it("should initialize memory at proper location", () => {
       //Load instructions to set register and check that the instructions
@@ -42,12 +42,6 @@ describe("VM", () => {
       vm.next();
       expect(vm.memory[0x200]).to.equal(0x6a);
       expect(vm.memory[0x201]).to.equal(0xff);
-    });
-    it("should set value to address register", () => {
-      const vm = initializeVm([0xa123]);
-      expect(vm.address).to.be.equal(0x0);
-      vm.next();
-      expect(vm.address).to.be.equal(0x123);
     });
   });
   describe("register operations", () => {
@@ -289,6 +283,14 @@ describe("VM", () => {
       times(2, () => vm.next());
       expect(vm.registers[0xa]).to.be.equal(0xff);
       expect(vm.registers[0xb]).to.be.equal(0xff);
+    });
+  });
+  describe("memory instructions", () => {
+    it("should set value to address register I", () => {
+      const vm = initializeVm([0xa123]);
+      expect(vm.address).to.be.equal(0x0);
+      vm.next();
+      expect(vm.address).to.be.equal(0x123);
     });
   });
 });

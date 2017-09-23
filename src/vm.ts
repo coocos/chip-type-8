@@ -113,7 +113,6 @@ export default class VM {
         case 0x9000: //Skip next instruction if register x does not equal register y
           instructions.skip(opcode, this);
           break;
-        case 0xa000: //Assign value to address register
         case 0x6000: //Set register x to value
         case 0x7000: //Add value to register x
         case 0xc000: //Set register x to bitwise and between value and random number
@@ -121,6 +120,9 @@ export default class VM {
           break;
         case 0x8000: //Various register-to-register operations
           instructions.betweenRegisters(opcode, this);
+          break;
+        case 0xa000: //Assign value to address register
+          instructions.memory(opcode, this);
           break;
         case 0xf000: //Miscellaneous instructions including sound and input
           let operation = opcode & 0x00ff;
