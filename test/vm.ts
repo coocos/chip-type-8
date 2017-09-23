@@ -1,5 +1,8 @@
-import VM from "../src/vm";
 import { expect } from "chai";
+import * as sinon from "sinon";
+
+import VM from "../src/vm";
+import * as utils from "../src/utils";
 
 /**
  * Initializes virtual machine with array of instructions
@@ -72,6 +75,14 @@ describe("VM", () => {
       //Assign register VA to VB
       vm.next();
       expect(vm.registers[0xa]).to.equal(0xee);
+    });
+    it("should assign random & value to register", () => {
+      //Stub random generator to always generate the same number
+      sinon.stub(utils, "randomByte").returns(0xff);
+
+      const vm = initializeVm([0xcaee]);
+      vm.next();
+      expect(vm.registers[0xa]).to.equal(0xff & 0xee);
     });
     it("should assign register | register to register", () => {
       const vm = initializeVm([0x6bcd, 0x6a12, 0x8ba1]);

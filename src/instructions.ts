@@ -1,5 +1,5 @@
 import VM from "./vm";
-import { prettyPrint } from "./utils";
+import { prettyPrint, randomByte } from "./utils";
 import { OpcodeError, StackError } from "./errors";
 
 const REGISTER_MASK = 0x0f00;
@@ -224,14 +224,17 @@ export function register(opcode: number, vm: VM) {
   const register = (opcode & REGISTER_MASK) >> 8;
   const value = opcode & 0x00ff;
   switch (instruction) {
-    case 0xa000: //Assign value to address register
+    case 0xa000: //Assign memory address to address register
       vm.address = opcode & 0x0fff;
       break;
-    case 0x6000: //Set register x to value (0x6xnn)
+    case 0x6000: //Set register x to value
       vm.registers[register] = value;
       break;
-    case 0x7000: //Add value to register x (0x7xnn)
+    case 0x7000: //Add value to register x
       vm.registers[register] = (vm.registers[register] + value) % 256;
+      break;
+    case 0xc000: //Set register to bitwise and between value and random number
+      vm.registers[register] = opcode & 0x00ff & randomByte();
       break;
     default:
       throw new OpcodeError(

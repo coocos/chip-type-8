@@ -23,9 +23,7 @@ export default class VM {
    */
   readonly memory: Uint8Array;
 
-  /**
-   * Subroutine stack
-   */
+  /** Subroutine stack */
   readonly stack: Array<number>;
 
   /** Program counter, i.e. the current instruction address */
@@ -118,6 +116,7 @@ export default class VM {
         case 0xa000: //Assign value to address register
         case 0x6000: //Set register x to value
         case 0x7000: //Add value to register x
+        case 0xc000: //Set register x to bitwise and between value and random number
           instructions.register(opcode, this);
           break;
         case 0x8000: //Various register-to-register operations
