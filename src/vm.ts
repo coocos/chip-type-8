@@ -133,6 +133,8 @@ export default class VM {
               instructions.timer(opcode, this);
               break;
             case 0x1e: //Assign register to address register
+            case 0x55: //Copy registers to memory
+            case 0x65: //Load registers from memory
               instructions.memory(opcode, this);
               break;
             default:

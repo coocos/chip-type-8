@@ -12,9 +12,11 @@
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",
+    "@types/lodash": "^4.14.74",
     "@types/mocha": "^2.2.43",
     "@types/sinon": "^2.3.5",
     "chai": "^4.1.2",
+    "lodash": "^4.17.4",
     "mocha": "^3.5.1",
     "prettier": "^1.6.1",
     "sinon": "^3.3.0",

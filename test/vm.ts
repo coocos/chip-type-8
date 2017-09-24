@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import * as sinon from "sinon";
+import * as _ from "lodash";
 
 import VM from "../src/vm";
 import * as utils from "../src/utils";
@@ -296,6 +297,50 @@ describe("Virtual machine", () => {
       const vm = initializeVm([0x6aff, 0xfa1e]);
       times(2, () => vm.next());
       expect(vm.address).to.equal(0xff);
+    });
+    it("should copy registers to memory starting at address in register I", () => {
+      //Generate instructions to set all registers from 0 to F to unique values,
+      //i.e. instructions 0x6000, 0x6101, 0x6202 all the way up to F
+      const opcodes = _.range(16).map(reg => 0x6000 | (reg << 8) | reg);
+      //Set all registers and address register I and copy registers to memory
+      const vm = initializeVm([...opcodes, 0xa300, 0xff55]);
+      times(18, () => vm.next());
+      //Check that the registers have been set
+      for (let register = 0; register < 0xf; register++) {
+        expect(vm.registers[register]).to.equal(register);
+      }
+      //Check that the registers have been copied to memory
+      for (let address = 0x300; address <= 0x30f; address++) {
+        expect(vm.memory[address]).to.equal(vm.registers[address & 0x00f]);
+      }
+      //Check that the memory beyond the register area was not filled
+      expect(vm.memory[0x310]).to.equal(0x0);
+      //Check that address register has been incremented by 1 for each copied register
+      expect(vm.address).to.equal(0x310);
+    });
+    it("should load registers from memory starting at address in register I", () => {
+      //Generate unique values for all registers - these should be loaded into registers
+      const registerValues = _.range(8).map(value => {
+        /**
+         * The virtual machine is usually initialized with 16-bit instructions in
+         * these tests so the initialization function assumes that the values to
+         * be loaded into memory are 16-bit values. However in this case we want
+         * to load 8-bit values into the memory so combine the 8-bit values into
+         * 16-bit pairwise values like 0x0102, 0x0304, 0x0506 and so on. This way
+         * the values get inserted into memory as 0x01, 0x02, 0x03, 0x04 and so on.
+         */
+        return ((value * 2) << 8) | (value * 2 + 1);
+      });
+      //Set address register to point to the values in memory and load values from
+      //memory to registers - all register should be filled after this
+      const vm = initializeVm([0xa208, 0xff65, 0x0, 0x0, ...registerValues]);
+      times(2, () => vm.next());
+      //Registers should now contain the values loaded from memory
+      for (let register = 0; register <= 0xf; register++) {
+        expect(vm.registers[register]).to.equal(register);
+      }
+      //Address register should have been incremented by the number of registers
+      expect(vm.address).to.equal(0x218);
     });
   });
 });

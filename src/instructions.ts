@@ -263,9 +263,33 @@ export function memory(opcode: number, vm: VM) {
     const register = (opcode & 0x0f00) >> 8;
     const newAddress = vm.address + vm.registers[register];
     vm.address = newAddress % SIXTEEN_BIT_WRAP;
+  } else if ((opcode & 0xf0ff) === 0xf055) {
+    /**
+     * Copy registers to memory starting from the address in the address
+     * register. The last register to be copied is dictated by the second
+     * byte of the instruction. For example 0xFA55 would copy the registers
+     * 0 to A to memory starting from the address stored in address register I.
+     */
+    const lastRegister = (opcode & 0x0f00) >> 8;
+    for (let register = 0; register <= lastRegister; register++) {
+      vm.memory[vm.address] = vm.registers[register];
+      vm.address++;
+    }
+  } else if ((opcode & 0xf0ff) === 0xf065) {
+    /**
+     * Load register contents from memory starting from the address in the
+     * address register. The last register to be loaded is dictated by the
+     * second byte of the instruction.
+     */
+    const lastRegister = (opcode & 0x0f00) >> 8;
+    for (let register = 0; register <= lastRegister; register++) {
+      vm.registers[register] = vm.memory[vm.address];
+      vm.address++;
+    }
   } else {
     throw new OpcodeError(
       `Failed to decode memory instruction: ${prettyPrint(opcode)}`
     );
   }
+  vm.incrementCounter();
 }
