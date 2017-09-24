@@ -1,9 +1,7 @@
 import VM from "./vm";
-import { prettyPrint, randomByte } from "./utils";
+import { prettyPrint, randomByte, nibble } from "./utils";
 import { OpcodeError, StackError } from "./errors";
 
-/** Bitmask for extracting the register from multiple instructions */
-const REGISTER_MASK = 0x0f00;
 /** Used to wrap numbers since JS does not have unsigned 8-bit integers */
 const EIGHT_BIT_WRAP = 0x100;
 /** Used to wrap numbers since JS does not have unsigned 16-bit integers */
@@ -20,7 +18,7 @@ export function skip(opcode: number, vm: VM) {
   let register: number, register1: number, register2: number, value: number;
   switch (identifier) {
     case 0x3000: //Skip next instruction if register is equal to value
-      register = (opcode & REGISTER_MASK) >> 8;
+      register = nibble(opcode).second();
       value = opcode & 0x00ff;
       if (vm.registers[register] === value) {
         vm.incrementCounter();
@@ -28,7 +26,7 @@ export function skip(opcode: number, vm: VM) {
       vm.incrementCounter();
       break;
     case 0x4000: //Skip next instruction if register not equal to value
-      register = (opcode & REGISTER_MASK) >> 8;
+      register = nibble(opcode).second();
       value = opcode & 0x00ff;
       if (vm.registers[register] !== value) {
         vm.incrementCounter();
@@ -36,16 +34,16 @@ export function skip(opcode: number, vm: VM) {
       vm.incrementCounter();
       break;
     case 0x5000: //Skip next instruction if register x equals register y
-      register1 = (opcode & 0x0f00) >> 8;
-      register2 = (opcode & 0x00f0) >> 4;
+      register1 = nibble(opcode).second();
+      register2 = nibble(opcode).third();
       if (vm.registers[register1] === vm.registers[register2]) {
         vm.incrementCounter();
       }
       vm.incrementCounter();
       break;
     case 0x9000: //Skip next instruction if register x does not equal register y
-      register1 = (opcode & 0x0f00) >> 8;
-      register2 = (opcode & 0x00f0) >> 4;
+      register1 = nibble(opcode).second();
+      register2 = nibble(opcode).third();
       if (vm.registers[register1] !== vm.registers[register2]) {
         vm.incrementCounter();
       }
@@ -226,7 +224,7 @@ export function betweenRegisters(opcode: number, vm: VM) {
  */
 export function register(opcode: number, vm: VM) {
   const instruction = opcode & 0xf000;
-  const register = (opcode & REGISTER_MASK) >> 8;
+  const register = nibble(opcode).second();
   const value = opcode & 0x00ff;
   switch (instruction) {
     case 0x6000: //Set register x to value
@@ -260,7 +258,7 @@ export function memory(opcode: number, vm: VM) {
     vm.address = opcode & 0x0fff;
   } else if ((opcode & 0xf0ff) === 0xf01e) {
     //Add register value to address register I
-    const register = (opcode & 0x0f00) >> 8;
+    const register = nibble(opcode).second();
     const newAddress = vm.address + vm.registers[register];
     vm.address = newAddress % SIXTEEN_BIT_WRAP;
   } else if ((opcode & 0xf0ff) === 0xf055) {
@@ -270,7 +268,7 @@ export function memory(opcode: number, vm: VM) {
      * byte of the instruction. For example 0xFA55 would copy the registers
      * 0 to A to memory starting from the address stored in address register I.
      */
-    const lastRegister = (opcode & 0x0f00) >> 8;
+    const lastRegister = nibble(opcode).second();
     for (let register = 0; register <= lastRegister; register++) {
       vm.memory[vm.address] = vm.registers[register];
       vm.address++;
@@ -281,7 +279,7 @@ export function memory(opcode: number, vm: VM) {
      * address register. The last register to be loaded is dictated by the
      * second byte of the instruction.
      */
-    const lastRegister = (opcode & 0x0f00) >> 8;
+    const lastRegister = nibble(opcode).second();
     for (let register = 0; register <= lastRegister; register++) {
       vm.registers[register] = vm.memory[vm.address];
       vm.address++;

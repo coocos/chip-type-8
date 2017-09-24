@@ -15,3 +15,27 @@ export function prettyPrint(opcode: number): string {
 export function randomByte(): number {
   return Math.round(Math.random() * 255);
 }
+
+/** Nibbler defines methods for extracting nibbles from a 16-bit instruction */
+interface Nibbler {
+  first(): number;
+  second(): number;
+  third(): number;
+  fourth(): number;
+}
+
+/**
+ * A convenience wrapper for extracting nibbles (4-bit blocks) from 16-bit
+ * opcodes. The returned Nibbler object contains methods for extracting
+ * the first, second, third or fourth most significant byte of an opcode.
+ * @param {number} instruction 16-bit instruction / opcode
+ * @returns {Nibbler} An object which contains methods for extracting nibbles
+ */
+export function nibble(instruction: number): Nibbler {
+  return {
+    first: () => (instruction & 0xf000) >> 12,
+    second: () => (instruction & 0x0f00) >> 8,
+    third: () => (instruction & 0x00f0) >> 4,
+    fourth: () => instruction & 0x000f
+  };
+}
