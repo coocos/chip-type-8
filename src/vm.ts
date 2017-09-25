@@ -158,12 +158,3 @@ export default class VM {
     }
   }
 }
-
-/**
- * Inspects the passed bytes and checks how many unique
- * opcodes there are. This is used for debugging only.
- * @param {Uint8Array} bytes Bytes
- */
-function inspect(bytes: Uint8Array) {
-  const uniqueOpcodes = new Set<number>(bytes);
-}
