@@ -1,4 +1,20 @@
 /**
+ * Calculate binary-coded decimal representation of an unsigned 8-bit integer.
+ * For example a value like 123 should return [1, 2, 3]. A proper binary-coded
+ * decimal would actually also combine the values via bitwise operations but the
+ * virtual machine is going to need to unpack it anyway and store them separately
+ * into memory so it makes sense to just return an array.
+ * @param {number} value Number to encode
+ * @returns {Array<number>} Binary-coded values
+ */
+export function bcd(value: number): Array<number> {
+  const hundreds = Math.floor(value / 100);
+  const tens = Math.floor((value / 10) % 10);
+  const ones = Math.floor((value % 100) % 10);
+  return [hundreds, tens, ones];
+}
+
+/**
  * Returns a hexadecimal string representation of a 16-bit opcode. For example
  * 255 will return '0x00FF'
  * @param {number} opcode Opcode

@@ -135,6 +135,7 @@ export default class VM {
             case 0x1e: //Assign register to address register
             case 0x55: //Copy registers to memory
             case 0x65: //Load registers from memory
+            case 0x33: //Store register as binary-coded decimal to memory
               instructions.memory(opcode, this);
               break;
             default:

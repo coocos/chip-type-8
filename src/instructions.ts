@@ -1,5 +1,5 @@
 import VM from "./vm";
-import { prettyPrint, randomByte, nibble } from "./utils";
+import { prettyPrint, randomByte, nibble, bcd } from "./utils";
 import { OpcodeError, StackError } from "./errors";
 
 /** Used to wrap numbers since JS does not have unsigned 8-bit integers */
@@ -283,6 +283,18 @@ export function memory(opcode: number, vm: VM) {
     for (let register = 0; register <= lastRegister; register++) {
       vm.registers[register] = vm.memory[vm.address];
       vm.address++;
+    }
+  } else if ((opcode & 0xf0ff) === 0xf033) {
+    /**
+     * Load register value to memory as a binary-coded decimal. The value
+     * is stored in three consecutive memory slots starting from the address
+     * in address register I. For example 0xFF would be stored in consecutive
+     * memory slots as values 2, 5 and 5.
+     */
+    const register = nibble(opcode).second();
+    const binaryCodedDigits = bcd(vm.registers[register]);
+    for (let offset = 0; offset < 3; offset++) {
+      vm.memory[vm.address + offset] = binaryCodedDigits[offset];
     }
   } else {
     throw new OpcodeError(

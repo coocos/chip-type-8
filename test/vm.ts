@@ -342,5 +342,22 @@ describe("Virtual machine", () => {
       //Address register should have been incremented by the number of registers
       expect(vm.address).to.equal(0x218);
     });
+    it("should store register value as binary-coded decimal in memory", () => {
+      /**
+       * Set register A to 0x7B, set address register I to 0x300 and check that
+       * the value of register A was stored as a binary-coded decimal in memory
+       * at addresses 0x300, 0x301 and 0x302. One digit should be stored at each
+       * location so 0x300 should contain 1, 0x301 2 and 0x302 3.
+       */
+      const vm = initializeVm([0x6a7b, 0xa300, 0xfa33]);
+      times(3, () => vm.next());
+      //Registers A and address register I should contain the expected values
+      expect(vm.registers[0xa]).to.equal(0x7b);
+      expect(vm.address).to.equal(0x300);
+      //Memory should now contain the BCD value
+      for (let value = 0; value < 3; value++) {
+        expect(vm.memory[0x300 + value]).to.equal(value + 1);
+      }
+    });
   });
 });
