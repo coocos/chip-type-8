@@ -46,7 +46,7 @@ describe("Virtual machine", () => {
       expect(vm.memory[0x201]).to.equal(0xff);
     });
   });
-  describe("register operations", () => {
+  describe("register instruction", () => {
     it("should set value to register", () => {
       //Check setting register VB to 0xFF
       const vm = initializeVm([0x6bff]);
@@ -180,7 +180,7 @@ describe("Virtual machine", () => {
       expect(vm.registers[0xf]).to.equal(0x0);
     });
   });
-  describe("skip instructions", () => {
+  describe("skip instruction", () => {
     it("should skip next instruction if register x does not equal register y", () => {
       const vm = initializeVm([0x6aff, 0x6bff, 0x9ab0, 0x6bfe, 0x9ab0]);
       //Check that upon initialization the program counter is at the right address
@@ -226,7 +226,7 @@ describe("Virtual machine", () => {
       expect(vm.counter).to.be.equal(0x208);
     });
   });
-  describe("jump instructions", () => {
+  describe("jump instruction", () => {
     it("should jump to address formed by adding value and register 0", () => {
       const vm = initializeVm([0xb204, 0x0, 0x60ff, 0xb2ff]);
       //Check that jumping works when register 0 is empty
@@ -246,7 +246,7 @@ describe("Virtual machine", () => {
       expect(vm.registers[0x0]).to.be.equal(0xff);
     });
   });
-  describe("timer instructions", () => {
+  describe("timer instruction", () => {
     it("should assign register value to delay timer", () => {
       const vm = initializeVm([0x6a3c, 0xfa15]);
       expect(vm.delayTimer).to.be.equal(0x0);
@@ -269,7 +269,7 @@ describe("Virtual machine", () => {
       expect(vm.registers[0xb]).to.be.equal(vm.delayTimer);
     });
   });
-  describe("subroutine instructions", () => {
+  describe("subroutine instruction", () => {
     it("should execute subroutine at a specific address", () => {
       const vm = initializeVm([0x2210]);
       vm.next();
@@ -287,7 +287,7 @@ describe("Virtual machine", () => {
       expect(vm.registers[0xb]).to.be.equal(0xff);
     });
   });
-  describe("memory instructions", () => {
+  describe("memory instruction", () => {
     it("should set value to address register I", () => {
       const vm = initializeVm([0xa123]);
       expect(vm.address).to.be.equal(0x0);
