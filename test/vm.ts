@@ -3,7 +3,10 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import * as _ from "lodash";
 
+import { stubCanvas } from "./stubs";
+
 import VM from "../src/vm";
+import Display from "../src/display";
 import * as utils from "../src/utils";
 
 /**
@@ -12,14 +15,19 @@ import * as utils from "../src/utils";
  * @return {VM} Initialized virtual machine
  */
 function initializeVm(opcodes: Array<number>): VM {
+  //Display uses CanvasElement for rendering so stub it
+  stubCanvas();
+  const display = new Display("#display");
+
   //Transform 16-bit opcodes to 8-bit bytes so they fit to memory
   const bytes = opcodes.reduce((bytes, opcode) => {
     const firstByte = opcode >> 8;
     const secondByte = opcode & 0x00ff;
     return new Uint8Array([...bytes, firstByte, secondByte]);
   }, new Uint8Array([]));
-  //Load bytes to memory
-  const vm = new VM();
+
+  //Initialize virtual machine
+  const vm = new VM(display);
   vm.load(bytes);
   return vm;
 }
@@ -359,6 +367,14 @@ describe("Virtual machine", () => {
       for (let value = 0; value < 3; value++) {
         expect(vm.memory[0x300 + value]).to.equal(value + 1);
       }
+    });
+  });
+  describe("display instruction", () => {
+    it("should clear the screen", () => {
+      const vm = initializeVm([0x00e0]);
+      sinon.spy(vm.display, "clear");
+      vm.next();
+      expect(vm.display.clear).to.have.property("calledOnce", true);
     });
   });
 });

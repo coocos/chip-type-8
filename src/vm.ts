@@ -1,6 +1,7 @@
 import * as instructions from "./instructions";
 import { prettyPrint } from "./utils";
 import { OpcodeError } from "./errors";
+import Display from "./display";
 
 /** ROMs loaded to memory start at 512 bytes in so at 0x200 */
 const ROM_START = 0x200;
@@ -26,6 +27,9 @@ export default class VM {
   /** Subroutine stack */
   readonly stack: Array<number>;
 
+  /** Display used to render sprites */
+  readonly display: Display;
+
   /** Program counter, i.e. the current instruction address */
   counter: number;
 
@@ -36,7 +40,7 @@ export default class VM {
   delayTimer: number;
   soundTimer: number;
 
-  constructor() {
+  constructor(display: Display) {
     this.registers = new Uint8Array(16);
     this.memory = new Uint8Array(0x1000);
     this.counter = ROM_START;
@@ -44,6 +48,7 @@ export default class VM {
     this.stack = [];
     this.delayTimer = 0;
     this.soundTimer = 0;
+    this.display = display;
   }
 
   /**
@@ -103,7 +108,18 @@ export default class VM {
         case 0xb000: //Jump to address formed by adding value and register 0
           instructions.jump(opcode, this);
           break;
-        case 0x0000: //Return from subroutine or execute machine language subroutine
+        case 0x0000: //Multiple instructions related to display and subroutines
+          switch (opcode) {
+            case 0x00e0: //Clear screen
+              instructions.display(opcode, this);
+              break;
+            case 0x00ee: //Return from subroutine
+            default:
+              //Execute machine language subroutine
+              instructions.subroutine(opcode, this);
+              break;
+          }
+          break;
         case 0x2000: //Execute subroutine
           instructions.subroutine(opcode, this);
           break;

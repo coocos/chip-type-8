@@ -303,3 +303,21 @@ export function memory(opcode: number, vm: VM) {
   }
   vm.incrementCounter();
 }
+
+/**
+ * Decodes instructions related to rendering sprites to a display
+ * @param {number} opcode Opcode / instruction
+ * @param {VM} vm Virtual machine
+ */
+export function display(opcode: number, vm: VM) {
+  //Clear screen
+  if (opcode === 0x00e0) {
+    if (vm.display) {
+      vm.display.clear();
+    }
+  } else {
+    throw new OpcodeError(
+      `Failed to decode display instruction: ${prettyPrint(opcode)}`
+    );
+  }
+}
