@@ -85,7 +85,7 @@ export function subroutine(opcode: number, vm: VM) {
       vm.incrementCounter();
       break;
     case 0x2000: //Call subroutine at address
-      const subroutineAddress = opcode & 0x0fff;
+      const subroutineAddress = nibble(opcode).without.first();
       //Push current program counter to the stack and set the counter to
       //subroutine address specified by the instruction
       vm.stack.push(vm.counter);
@@ -108,12 +108,12 @@ export function jump(opcode: number, vm: VM) {
   const identifier = opcode & 0xf000;
   switch (identifier) {
     case 0x1000: //Jump to address
-      vm.counter = opcode & 0x0fff;
+      vm.counter = nibble(opcode).without.first();
       break;
     case 0xb000: //Jump to address formed by adding value and register 0
-      let value = opcode & 0x0fff;
+      let value = nibble(opcode).without.first();
       //Handle 16-bit wrap arounds
-      vm.counter = (value + vm.registers[0]) % 0x10000;
+      vm.counter = (value + vm.registers[0]) % SIXTEEN_BIT_WRAP;
       break;
     default:
       throw new OpcodeError(
@@ -130,7 +130,7 @@ export function jump(opcode: number, vm: VM) {
  */
 export function timer(opcode: number, vm: VM) {
   const operation = opcode & 0x00ff;
-  const register = (opcode & 0x0f00) >> 8;
+  const register = nibble(opcode).second();
   switch (operation) {
     case 0x07: //Assign delay timer value to register
       vm.registers[register] = vm.delayTimer;
@@ -158,13 +158,14 @@ export function timer(opcode: number, vm: VM) {
  */
 export function betweenRegisters(opcode: number, vm: VM) {
   const operation = opcode & 0x000f;
-  const register1 = (opcode & 0x0f00) >> 8;
-  const register2 = (opcode & 0x00f0) >> 4;
+  const register1 = nibble(opcode).second();
+  const register2 = nibble(opcode).third();
   let sub;
 
   switch (operation) {
     case 0x0: //Assign register y to register x (0x8xy0)
       vm.registers[register1] = vm.registers[register2];
+
       break;
     case 0x1: //Assign register x | register y to register x
       vm.registers[register1] =
@@ -255,13 +256,13 @@ export function memory(opcode: number, vm: VM) {
 
   if (identifier === 0xa000) {
     //Assign memory address to address register I
-    vm.address = opcode & 0x0fff;
-  } else if ((opcode & 0xf0ff) === 0xf01e) {
+    vm.address = nibble(opcode).without.first();
+  } else if (nibble(opcode).without.second() === 0xf01e) {
     //Add register value to address register I
     const register = nibble(opcode).second();
     const newAddress = vm.address + vm.registers[register];
     vm.address = newAddress % SIXTEEN_BIT_WRAP;
-  } else if ((opcode & 0xf0ff) === 0xf055) {
+  } else if (nibble(opcode).without.second() === 0xf055) {
     /**
      * Copy registers to memory starting from the address in the address
      * register. The last register to be copied is dictated by the second
@@ -273,7 +274,7 @@ export function memory(opcode: number, vm: VM) {
       vm.memory[vm.address] = vm.registers[register];
       vm.address++;
     }
-  } else if ((opcode & 0xf0ff) === 0xf065) {
+  } else if (nibble(opcode).without.second() === 0xf065) {
     /**
      * Load register contents from memory starting from the address in the
      * address register. The last register to be loaded is dictated by the
@@ -284,7 +285,7 @@ export function memory(opcode: number, vm: VM) {
       vm.registers[register] = vm.memory[vm.address];
       vm.address++;
     }
-  } else if ((opcode & 0xf0ff) === 0xf033) {
+  } else if (nibble(opcode).without.second() === 0xf033) {
     /**
      * Load register value to memory as a binary-coded decimal. The value
      * is stored in three consecutive memory slots starting from the address

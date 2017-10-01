@@ -99,7 +99,7 @@ export default class VM {
    * @param {number} opcode Opcode to be executed
    */
   execute(opcode: number) {
-    //Shift to get the opcode identifying nibble
+    //Most opcodes can be identified by the first nibble
     const identifier = opcode & 0xf000;
 
     try {
