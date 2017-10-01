@@ -310,14 +310,29 @@ export function memory(opcode: number, vm: VM) {
  * @param {VM} vm Virtual machine
  */
 export function display(opcode: number, vm: VM) {
+  const nibbles = nibble(opcode);
   //Clear screen
   if (opcode === 0x00e0) {
-    if (vm.display) {
-      vm.display.clear();
-    }
+    vm.display.clear();
+  } else if (nibbles.first() === 0xd) {
+    //Read sprite data from the memory address pointed to by the address register
+    const spriteByteCount = nibbles.fourth();
+    const spriteBytes = vm.memory.slice(
+      vm.address,
+      vm.address + spriteByteCount
+    );
+    const pixelsFlipped = vm.display.drawSprite(
+      nibbles.second(),
+      nibbles.third(),
+      spriteBytes
+    );
+    //If any non-empty pixels were flipped to empty when the sprite was
+    //drawn then set register F to 1. Otherwise set it to 0
+    vm.registers[0xf] = pixelsFlipped ? 1 : 0;
   } else {
     throw new OpcodeError(
       `Failed to decode display instruction: ${prettyPrint(opcode)}`
     );
   }
+  vm.incrementCounter();
 }

@@ -376,5 +376,36 @@ describe("Virtual machine", () => {
       vm.next();
       expect(vm.display.clear).to.have.property("calledOnce", true);
     });
+    it("should read and draw sprite from memory", () => {
+      const vm = initializeVm([
+        0xa20e, //Assign address 0x208 to address register I
+        0xd002, //Draw 2 bytes worth of sprites from register I to (0, 0)
+        0xa210, //Assing address 0x210 to address register I
+        0xd011, //Draw a single sprite byte from register I to (0, 1)
+        0x00e0, //Clear screen (dummy instruction to pad memory)
+        0x00e0, //Clear screen (dummy instruction to pad memory)
+        0x00e0, //Clear screen (dummy instruction to pad memory)
+        0xff0f, //Sprite data (row with 8 non-empty pixels and row with 4 non-empty pixels)
+        0x0100 //Sprite data (row with 7 empty pixels and 1 non-empty pixel)
+      ]);
+      const drawSprite = sinon.spy(vm.display, "drawSprite");
+
+      //Check that the virtual machine handles first sprite correctly
+      times(2, () => vm.next());
+      expect(drawSprite).to.have.property("calledOnce", true);
+      let expectedArgs = [0, 0, Uint8Array.from([0xff, 0xf])];
+      expect(drawSprite.calledWith(...expectedArgs)).to.be.true;
+      //Drawing the sprite should not cause any flipped pixels
+      expect(vm.registers[0xf]).to.equal(0);
+
+      //Check that the virtual machine handles the second sprite correctly
+      expectedArgs = [0, 1, Uint8Array.from([0x01])];
+      times(2, () => vm.next());
+      expect(drawSprite).to.have.property("calledTwice", true);
+      expect(drawSprite.calledWith(...expectedArgs)).to.be.true;
+      //Drawing the sprite should cause a flipped pixel since it overlaps
+      //the previously drawn sprite
+      expect(vm.registers[0xf]).to.equal(1);
+    });
   });
 });

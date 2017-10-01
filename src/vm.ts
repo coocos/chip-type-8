@@ -140,6 +140,9 @@ export default class VM {
         case 0xa000: //Assign value to address register
           instructions.memory(opcode, this);
           break;
+        case 0xd000: //Draw sprite
+          instructions.display(opcode, this);
+          break;
         case 0xf000: //Contains a myriad of instructions
           let operation = opcode & 0x00ff;
           switch (operation) {
