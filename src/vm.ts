@@ -1,6 +1,7 @@
 import * as instructions from "./instructions";
 import { prettyPrint } from "./utils";
 import { OpcodeError } from "./errors";
+import { getFontSprites } from "./fonts";
 import Display from "./display";
 
 /** ROMs loaded to memory start at 512 bytes in so at 0x200 */
@@ -49,6 +50,17 @@ export default class VM {
     this.delayTimer = 0;
     this.soundTimer = 0;
     this.display = display;
+    this.loadFonts();
+  }
+
+  /** Load font sprite data to memory. Fonts are placed in a memory location
+     * that applications won't use - the very beginning of the memory space.
+     */
+  private loadFonts() {
+    const fontData = getFontSprites();
+    for (let address = 0; address < fontData.length; address++) {
+      this.memory[address] = fontData[address];
+    }
   }
 
   /**
@@ -152,9 +164,10 @@ export default class VM {
               instructions.timer(opcode, this);
               break;
             case 0x1e: //Assign register to address register
+            case 0x29: //Assign font sprite location to address register
+            case 0x33: //Store register as binary-coded decimal to memory
             case 0x55: //Copy registers to memory
             case 0x65: //Load registers from memory
-            case 0x33: //Store register as binary-coded decimal to memory
               instructions.memory(opcode, this);
               break;
             default:

@@ -297,6 +297,14 @@ export function memory(opcode: number, vm: VM) {
     for (let offset = 0; offset < 3; offset++) {
       vm.memory[vm.address + offset] = binaryCodedDigits[offset];
     }
+  } else if (nibble(opcode).without.second() === 0xf029) {
+    /**
+     * Set address register to location of the font sprite. Font sprites are
+     * loaded by the interpreter to 0x0 and onwards with 5 bytes of allocated
+     * for each font. The second nibble of the opcode identifies the font.
+     */
+    const font = nibble(opcode).second();
+    vm.address = font * 5;
   } else {
     throw new OpcodeError(
       `Failed to decode memory instruction: ${prettyPrint(opcode)}`

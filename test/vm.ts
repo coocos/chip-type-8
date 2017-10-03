@@ -368,6 +368,21 @@ describe("Virtual machine", () => {
         expect(vm.memory[0x300 + value]).to.equal(value + 1);
       }
     });
+    it("should set address register I to point to font sprites", () => {
+      const vm = initializeVm([
+        0xf029, //Point address register to the location of the 0 font
+        0xff29 //Point address register to the location of the f font
+      ]);
+      //Font data should be loaded to memory during startup
+      const zeroFont = Uint8Array.from([0xf0, 0x90, 0x90, 0x90, 0xf0]);
+      expect(vm.memory.slice(0, 5)).to.deep.equal(zeroFont);
+      //Address register should get updated to the location of the 0 font
+      vm.next();
+      expect(vm.address).to.equal(0x0);
+      //Address register should get updated to the location of the f font
+      vm.next();
+      expect(vm.address).to.equal(0x4b);
+    });
   });
   describe("display instruction", () => {
     it("should clear the screen", () => {
