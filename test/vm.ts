@@ -393,10 +393,13 @@ describe("Virtual machine", () => {
     });
     it("should read and draw sprite from memory", () => {
       const vm = initializeVm([
-        0xa20e, //Assign address 0x208 to address register I
-        0xd002, //Draw 2 bytes worth of sprites from register I to (0, 0)
-        0xa210, //Assing address 0x210 to address register I
-        0xd011, //Draw a single sprite byte from register I to (0, 1)
+        0x6000, //Assign 0x0 to register 0
+        0x6101, //Assign 0x1 to register 1
+        0x6205, //Assign 0x5 to register 2
+        0xa214, //Assign address 0x214 to address register I
+        0xd202, //Draw 2 bytes worth of sprites from register I to (5, 0)
+        0xa216, //Assing address 0x216 to address register I
+        0xd211, //Draw a single sprite byte from register I to (5, 1)
         0x00e0, //Clear screen (dummy instruction to pad memory)
         0x00e0, //Clear screen (dummy instruction to pad memory)
         0x00e0, //Clear screen (dummy instruction to pad memory)
@@ -405,16 +408,19 @@ describe("Virtual machine", () => {
       ]);
       const drawSprite = sinon.spy(vm.display, "drawSprite");
 
+      //Assign pixel coordinates to registers
+      times(3, () => vm.next());
+
       //Check that the virtual machine handles first sprite correctly
       times(2, () => vm.next());
       expect(drawSprite).to.have.property("calledOnce", true);
-      let expectedArgs = [0, 0, Uint8Array.from([0xff, 0xf])];
+      let expectedArgs = [5, 0, Uint8Array.from([0xff, 0xf])];
       expect(drawSprite.calledWith(...expectedArgs)).to.be.true;
       //Drawing the sprite should not cause any flipped pixels
       expect(vm.registers[0xf]).to.equal(0);
 
       //Check that the virtual machine handles the second sprite correctly
-      expectedArgs = [0, 1, Uint8Array.from([0x01])];
+      expectedArgs = [5, 1, Uint8Array.from([0x01])];
       times(2, () => vm.next());
       expect(drawSprite).to.have.property("calledTwice", true);
       expect(drawSprite.calledWith(...expectedArgs)).to.be.true;

@@ -324,15 +324,26 @@ export function display(opcode: number, vm: VM) {
   if (opcode === 0x00e0) {
     vm.display.clear();
   } else if (nibbles.first() === 0xd) {
-    //Read sprite data from the memory address pointed to by the address register
+    /**
+     * Draw a sprite by reading sprite data from address register and drawing
+     * the sprite to the coordinate specified in registers x and y.
+     *
+     * The second nibble of the instruction defines the register which stores the x
+     * coordinate and the third nibble the register which stores the y coordinate.
+     * The fourth nibble defines how many bytes should be read from the address
+     * register, i.e. how tall the sprite is as each byte corresponds to a row of
+     * 8 pixels.
+     */
     const spriteByteCount = nibbles.fourth();
     const spriteBytes = vm.memory.slice(
       vm.address,
       vm.address + spriteByteCount
     );
+    const xCoordinate = vm.registers[nibbles.second()];
+    const yCoordinate = vm.registers[nibbles.third()];
     const pixelsFlipped = vm.display.drawSprite(
-      nibbles.second(),
-      nibbles.third(),
+      xCoordinate,
+      yCoordinate,
       spriteBytes
     );
     //If any non-empty pixels were flipped to empty when the sprite was
