@@ -17,6 +17,7 @@ export default class Display {
       throw new Error(`Failed to find ${domElement} in DOM`);
     }
     this.context = this.canvas.getContext("2d")!;
+    this.clear();
   }
 
   /**
@@ -72,6 +73,7 @@ export default class Display {
 
   /** Clears the display */
   clear() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.fillStyle = "#000";
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }
