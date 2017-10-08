@@ -3,10 +3,11 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import * as _ from "lodash";
 
-import { stubCanvas } from "./stubs";
+import { stubCanvas, stubKeys } from "./stubs";
 
 import VM from "../src/vm";
 import Display from "../src/display";
+import Input from "../src/input";
 import * as utils from "../src/utils";
 
 /**
@@ -14,9 +15,10 @@ import * as utils from "../src/utils";
  * @param {Array<number>} opcodes Array of opcodes
  * @return {VM} Initialized virtual machine
  */
-function initializeVm(opcodes: Array<number>): VM {
-  //Display uses CanvasElement for rendering so stub it
-  stubCanvas();
+function initializeVm(opcodes: number[]): VM {
+  //Stub DOM methods required by display and input for virtual machine tests
+  (<any>global).document = Object.assign({}, stubKeys(), stubCanvas());
+  const input = new Input();
   const display = new Display("#display");
 
   //Transform 16-bit opcodes to 8-bit bytes so they fit to memory
@@ -27,7 +29,7 @@ function initializeVm(opcodes: Array<number>): VM {
   }, new Uint8Array([]));
 
   //Initialize virtual machine
-  const vm = new VM(display);
+  const vm = new VM(display, input);
   vm.load(bytes);
   return vm;
 }
@@ -52,6 +54,22 @@ describe("Virtual machine", () => {
       vm.next();
       expect(vm.memory[0x200]).to.equal(0x6a);
       expect(vm.memory[0x201]).to.equal(0xff);
+    });
+  });
+  describe("input instruction", () => {
+    it("should skip a code block depending on the input", () => {
+      const vm = initializeVm([
+        0x6a0f, //Assign key 15 to register a
+        0xea9e, //Skip next instruction if 15 is pressed
+        0xea9e //Skip next instruction if 15 is pressed
+      ]);
+      const keys = stubKeys();
+      times(2, () => vm.next());
+      expect(vm.counter).to.equal(0x204);
+      //Press the key and execute the same instruction again
+      document.dispatchEvent(<KeyboardEvent>{ type: "keydown", key: "15" });
+      vm.next();
+      expect(vm.counter).to.equal(0x208);
     });
   });
   describe("register instruction", () => {

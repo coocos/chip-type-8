@@ -8,15 +8,15 @@ import Display from "../src/display";
 
 describe("Display", () => {
   it("should clear screen", () => {
-    stubCanvas();
+    (<any>global).document = stubCanvas();
     const display = new Display("#display");
-    sinon.spy(display.context, "clearRect");
+    sinon.spy(display.context, "fillRect");
     display.clear();
-    expect(display.context.clearRect).to.have.property("calledOnce", true);
+    expect(display.context.fillRect).to.have.property("calledOnce", true);
   });
   it("should draw a sprite", () => {
     //Initialize stubs, spies and construct display
-    stubCanvas();
+    (<any>global).document = stubCanvas();
     const display = new Display("#display");
     sinon.spy(display.context, "fillRect");
 

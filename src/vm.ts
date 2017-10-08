@@ -3,6 +3,7 @@ import { prettyPrint } from "./utils";
 import { OpcodeError } from "./errors";
 import { getFontSprites } from "./fonts";
 import Display from "./display";
+import Input from "./input";
 
 /** ROMs loaded to memory start at 512 bytes in so at 0x200 */
 const ROM_START = 0x200;
@@ -31,6 +32,9 @@ export default class VM {
   /** Display used to render sprites */
   readonly display: Display;
 
+  /** Input handler */
+  readonly input: Input;
+
   /** Program counter, i.e. the current instruction address */
   counter: number;
 
@@ -41,7 +45,7 @@ export default class VM {
   delayTimer: number;
   soundTimer: number;
 
-  constructor(display: Display) {
+  constructor(display: Display, input: Input = new Input()) {
     this.registers = new Uint8Array(16);
     this.memory = new Uint8Array(0x1000);
     this.counter = ROM_START;
@@ -50,6 +54,7 @@ export default class VM {
     this.delayTimer = 0;
     this.soundTimer = 0;
     this.display = display;
+    this.input = input;
     this.loadFonts();
   }
 
@@ -106,6 +111,11 @@ export default class VM {
     this.counter += 2;
   }
 
+  /** Returns whether input key is pressed */
+  isKeyPressed(key: string) {
+    return this.input.isPressed(key);
+  }
+
   /**
    * Executes opcode and logs if the opcode is not identified
    * @param {number} opcode Opcode to be executed
@@ -154,6 +164,9 @@ export default class VM {
           break;
         case 0xd000: //Draw sprite
           instructions.display(opcode, this);
+          break;
+        case 0xe000: //Handle input
+          instructions.input(opcode, this);
           break;
         case 0xf000: //Contains a myriad of instructions
           let operation = opcode & 0x00ff;

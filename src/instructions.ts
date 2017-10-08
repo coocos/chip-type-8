@@ -356,3 +356,31 @@ export function display(opcode: number, vm: VM) {
   }
   vm.incrementCounter();
 }
+
+/**
+ * Decodes instructions related to input handling
+ * @param {number} opcode Opcode / instruction
+ * @param {VM} vm Virtual machine
+ */
+export function input(opcode: number, vm: VM) {
+  const nibbles = nibble(opcode);
+  const identifier = nibbles.without.second();
+  const register = nibbles.second();
+  switch (identifier) {
+    case 0xe09e:
+      /**
+       * If the key stored in register is currently pressed then
+       * skip the following instruction
+       */
+      const key = vm.registers[register];
+      if (vm.isKeyPressed(String(key))) {
+        vm.incrementCounter();
+      }
+      vm.incrementCounter();
+      break;
+    default:
+      throw new OpcodeError(
+        `Failed to decode input instruction: ${prettyPrint(opcode)}`
+      );
+  }
+}
