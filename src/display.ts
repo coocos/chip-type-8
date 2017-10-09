@@ -5,6 +5,9 @@ export default class Display {
   /** Two-dimensional context for canvas */
   context: CanvasRenderingContext2D;
 
+  /** Scaling factor of the screen */
+  scale: number;
+
   /**
    * Constructs display by finding the corresponding element from DOM
    * and constructs a two-dimensional context for sprite opertaions
@@ -18,6 +21,7 @@ export default class Display {
     }
     this.context = this.canvas.getContext("2d")!;
     this.clear();
+    this.scale = 1;
   }
 
   /**
@@ -44,14 +48,21 @@ export default class Display {
         //Only set bits / pixels are drawn - unset bits are ignored
         if (bit) {
           //If pixel is already set it needs to be flipped
-          if (this.isPixelSet(x1 + (7 - x), y1 + y)) {
+          if (
+            this.isPixelSet((x1 + (7 - x)) * this.scale, (y1 + y) * this.scale)
+          ) {
             pixelsFlipped = true;
             this.context.fillStyle = "rgb(0, 0, 0)";
           } else {
             this.context.fillStyle = "rgb(255, 255, 255)";
           }
           //Fill pixel
-          this.context.fillRect(x1 + (7 - x), y1 + y, 1, 1);
+          this.context.fillRect(
+            (x1 + (7 - x)) * this.scale,
+            (y1 + y) * this.scale,
+            1 * this.scale,
+            1 * this.scale
+          );
         }
       }
     }

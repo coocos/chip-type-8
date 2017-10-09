@@ -124,82 +124,74 @@ export default class VM {
     //Most opcodes can be identified by the first nibble
     const identifier = opcode & 0xf000;
 
-    try {
-      switch (identifier) {
-        case 0x1000: //Jump to address
-        case 0xb000: //Jump to address formed by adding value and register 0
-          instructions.jump(opcode, this);
-          break;
-        case 0x0000: //Multiple instructions related to display and subroutines
-          switch (opcode) {
-            case 0x00e0: //Clear screen
-              instructions.display(opcode, this);
-              break;
-            case 0x00ee: //Return from subroutine
-            default:
-              //Execute machine language subroutine
-              instructions.subroutine(opcode, this);
-              break;
-          }
-          break;
-        case 0x2000: //Execute subroutine
-          instructions.subroutine(opcode, this);
-          break;
-        case 0x3000: //Skip next instruction if register is equal to value
-        case 0x4000: //Skip next instruction if register not equal to value
-        case 0x5000: //Skip next instruction if register x equals register y
-        case 0x9000: //Skip next instruction if register x does not equal register y
-          instructions.skip(opcode, this);
-          break;
-        case 0x6000: //Set register x to value
-        case 0x7000: //Add value to register x
-        case 0xc000: //Set register x to bitwise and between value and random number
-          instructions.register(opcode, this);
-          break;
-        case 0x8000: //Various register-to-register operations
-          instructions.betweenRegisters(opcode, this);
-          break;
-        case 0xa000: //Assign value to address register
-          instructions.memory(opcode, this);
-          break;
-        case 0xd000: //Draw sprite
-          instructions.display(opcode, this);
-          break;
-        case 0xe000: //Handle input
-          instructions.input(opcode, this);
-          break;
-        case 0xf000: //Contains a myriad of instructions
-          let operation = opcode & 0x00ff;
-          switch (operation) {
-            case 0x07: //Assign delay timer value to register
-            case 0x15: //Assign register value to delay timer
-            case 0x18: //Assign register value to sound timer
-              instructions.timer(opcode, this);
-              break;
-            case 0x1e: //Assign register to address register
-            case 0x29: //Assign font sprite location to address register
-            case 0x33: //Store register as binary-coded decimal to memory
-            case 0x55: //Copy registers to memory
-            case 0x65: //Load registers from memory
-              instructions.memory(opcode, this);
-              break;
-            default:
-              throw new OpcodeError(
-                `Failed to execute misc instruction: ${prettyPrint(opcode)}`
-              );
-          }
-          break;
-        default:
-          throw new OpcodeError(
-            `Failed to execute instruction: ${prettyPrint(opcode)}`
-          );
-      }
-    } catch (e) {
-      if (e instanceof OpcodeError) {
-        console.warn(e);
-      } else {
-        throw e;
-      }
+    switch (identifier) {
+      case 0x1000: //Jump to address
+      case 0xb000: //Jump to address formed by adding value and register 0
+        instructions.jump(opcode, this);
+        break;
+      case 0x0000: //Multiple instructions related to display and subroutines
+        switch (opcode) {
+          case 0x00e0: //Clear screen
+            instructions.display(opcode, this);
+            break;
+          case 0x00ee: //Return from subroutine
+          default:
+            //Execute machine language subroutine
+            instructions.subroutine(opcode, this);
+            break;
+        }
+        break;
+      case 0x2000: //Execute subroutine
+        instructions.subroutine(opcode, this);
+        break;
+      case 0x3000: //Skip next instruction if register is equal to value
+      case 0x4000: //Skip next instruction if register not equal to value
+      case 0x5000: //Skip next instruction if register x equals register y
+      case 0x9000: //Skip next instruction if register x does not equal register y
+        instructions.skip(opcode, this);
+        break;
+      case 0x6000: //Set register x to value
+      case 0x7000: //Add value to register x
+      case 0xc000: //Set register x to bitwise and between value and random number
+        instructions.register(opcode, this);
+        break;
+      case 0x8000: //Various register-to-register operations
+        instructions.betweenRegisters(opcode, this);
+        break;
+      case 0xa000: //Assign value to address register
+        instructions.memory(opcode, this);
+        break;
+      case 0xd000: //Draw sprite
+        instructions.display(opcode, this);
+        break;
+      case 0xe000: //Handle input
+        instructions.input(opcode, this);
+        break;
+      case 0xf000: //Contains a myriad of instructions
+        let operation = opcode & 0x00ff;
+        switch (operation) {
+          case 0x07: //Assign delay timer value to register
+          case 0x15: //Assign register value to delay timer
+          case 0x18: //Assign register value to sound timer
+            instructions.timer(opcode, this);
+            break;
+          case 0x1e: //Assign register to address register
+          case 0x29: //Assign font sprite location to address register
+          case 0x33: //Store register as binary-coded decimal to memory
+          case 0x55: //Copy registers to memory
+          case 0x65: //Load registers from memory
+            instructions.memory(opcode, this);
+            break;
+          default:
+            throw new OpcodeError(
+              `Failed to execute misc instruction: ${prettyPrint(opcode)}`
+            );
+        }
+        break;
+      default:
+        throw new OpcodeError(
+          `Failed to execute instruction: ${prettyPrint(opcode)}`
+        );
     }
   }
 }
