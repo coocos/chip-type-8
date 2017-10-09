@@ -366,13 +366,23 @@ export function input(opcode: number, vm: VM) {
   const nibbles = nibble(opcode);
   const identifier = nibbles.without.second();
   const register = nibbles.second();
+  const key = vm.registers[register];
   switch (identifier) {
+    case 0xe0a1:
+      /**
+       * If the key stored in register is currently not pressed then
+       * skip the following instruction
+       */
+      if (!vm.isKeyPressed(String(key))) {
+        vm.incrementCounter();
+      }
+      vm.incrementCounter();
+      break;
     case 0xe09e:
       /**
        * If the key stored in register is currently pressed then
        * skip the following instruction
        */
-      const key = vm.registers[register];
       if (vm.isKeyPressed(String(key))) {
         vm.incrementCounter();
       }

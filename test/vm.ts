@@ -59,17 +59,29 @@ describe("Virtual machine", () => {
   describe("input instruction", () => {
     it("should skip a code block depending on the input", () => {
       const vm = initializeVm([
-        0x6a0f, //Assign key 15 to register a
-        0xea9e, //Skip next instruction if 15 is pressed
-        0xea9e //Skip next instruction if 15 is pressed
+        0x6a0f, //Assign 0xf to register a
+        0xea9e, //Skip next instruction if 0xf is pressed
+        0xea9e, //Skip next instruction if 0xf is pressed
+        0x6b0f, //Assign 0xf to register b - should not happen
+        0xeaa1, //Skip next instruction if 0xf is not pressed
+        0xeaa1 //Skip next instruction if 0xf is not pressed
       ]);
       const keys = stubKeys();
       times(2, () => vm.next());
       expect(vm.counter).to.equal(0x204);
       //Press the key and execute the same instruction again
-      document.dispatchEvent(<KeyboardEvent>{ type: "keydown", key: "15" });
+      document.dispatchEvent(<KeyboardEvent>{ type: "keydown", key: "v" });
       vm.next();
+      //Key is pressed - next instruction should be skipped
       expect(vm.counter).to.equal(0x208);
+      expect(vm.registers[0xb]).to.equal(0x0);
+      //Key is pressed - next instruction should not be skipped
+      vm.next();
+      expect(vm.counter).to.equal(0x20a);
+      //Lift key - next instruction should be skipped
+      document.dispatchEvent(<KeyboardEvent>{ type: "keyup", key: "v" });
+      vm.next();
+      expect(vm.counter).to.equal(0x20e);
     });
   });
   describe("register instruction", () => {
