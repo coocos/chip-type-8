@@ -2,9 +2,8 @@ import VM from "./vm";
 import { prettyPrint, randomByte, nibble, bcd } from "./utils";
 import { OpcodeError, StackError } from "./errors";
 
-/** Used to wrap numbers since JS does not have unsigned 8-bit integers */
+/** Max values for 8-bit and 16-bit unsigned integers - used for carry flags */
 const EIGHT_BIT_WRAP = 0x100;
-/** Used to wrap numbers since JS does not have unsigned 16-bit integers */
 const SIXTEEN_BIT_WRAP = 0x10000;
 
 /**
@@ -113,7 +112,10 @@ export function jump(opcode: number, vm: VM) {
     case 0xb000: //Jump to address formed by adding value and register 0
       let value = nibble(opcode).without.first();
       //Handle 16-bit wrap arounds
-      vm.counter = (value + vm.registers[0]) % SIXTEEN_BIT_WRAP;
+      vm.counter = value + vm.registers[0];
+      if (vm.counter >= SIXTEEN_BIT_WRAP) {
+        throw new Error("Program counter corrupted");
+      }
       break;
     default:
       throw new OpcodeError(
@@ -181,13 +183,13 @@ export function betweenRegisters(opcode: number, vm: VM) {
       break;
     case 0x4: //Add register x to register y
       const sum = vm.registers[register1] + vm.registers[register2];
-      vm.registers[register1] = sum % EIGHT_BIT_WRAP;
+      vm.registers[register1] = sum;
       //Set VF to 1 if the register value wrapped around, 0 if not
       vm.registers[0xf] = sum >= EIGHT_BIT_WRAP ? 1 : 0;
       break;
     case 0x5: //Subtract register y from register x
       sub = vm.registers[register1] - vm.registers[register2];
-      vm.registers[register1] = sub < 0 ? EIGHT_BIT_WRAP + sub : sub;
+      vm.registers[register1] = sub;
       //Set VF to 0 if the register value wrapped around, 1 if not
       vm.registers[0xf] = sub < 0 ? 0 : 1;
       break;
@@ -199,7 +201,7 @@ export function betweenRegisters(opcode: number, vm: VM) {
       break;
     case 0x7: //Subtract register x from register y and assign to register x
       sub = vm.registers[register2] - vm.registers[register1];
-      vm.registers[register1] = sub < 0 ? EIGHT_BIT_WRAP + sub : sub;
+      vm.registers[register1] = sub;
       //Set VF to 0 if the register value wrapped around, 1 if not
       vm.registers[0xf] = sub < 0 ? 0 : 1;
       break;
