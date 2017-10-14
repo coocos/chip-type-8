@@ -97,7 +97,7 @@ export default class Display {
 
   /** Clears the display */
   clear() {
-    this.context.fillStyle = "#000";
+    this.context.fillStyle = Display.BACKGROUND_COLOR;
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }
