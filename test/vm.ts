@@ -400,17 +400,19 @@ describe("Virtual machine", () => {
     });
     it("should set address register I to point to font sprites", () => {
       const vm = initializeVm([
-        0xf029, //Point address register to the location of the 0 font
-        0xff29 //Point address register to the location of the f font
+        0x6000, //Insert 0x0 to register 0
+        0xf029, //Point address register to the font 0 in register 0
+        0x600f, //Insert 0xf to register 0
+        0xf029 //Point address register to the font F in register 0
       ]);
       //Font data should be loaded to memory during startup
       const zeroFont = Uint8Array.from([0xf0, 0x90, 0x90, 0x90, 0xf0]);
       expect(vm.memory.slice(0, 5)).to.deep.equal(zeroFont);
       //Address register should get updated to the location of the 0 font
-      vm.next();
+      times(2, () => vm.next());
       expect(vm.address).to.equal(0x0);
       //Address register should get updated to the location of the f font
-      vm.next();
+      times(2, () => vm.next());
       expect(vm.address).to.equal(0x4b);
     });
   });

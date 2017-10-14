@@ -70,6 +70,7 @@ export function subroutine(opcode: number, vm: VM) {
     case 0x0000: //Execute machine language subroutine at address
       //NOTE: Not implemented by design - this instruction is considered
       //deprecated.
+      vm.incrementCounter();
       break;
     case 0x00ee: //Return from subroutine
       const address = vm.stack.pop();
@@ -111,7 +112,6 @@ export function jump(opcode: number, vm: VM) {
       break;
     case 0xb000: //Jump to address formed by adding value and register 0
       let value = nibble(opcode).without.first();
-      //Handle 16-bit wrap arounds
       vm.counter = value + vm.registers[0];
       if (vm.counter >= SIXTEEN_BIT_WRAP) {
         throw new Error("Program counter corrupted");
@@ -234,8 +234,7 @@ export function register(opcode: number, vm: VM) {
       vm.registers[register] = value;
       break;
     case 0x7000: //Add value to register x
-      vm.registers[register] =
-        (vm.registers[register] + value) % EIGHT_BIT_WRAP;
+      vm.registers[register] += value;
       break;
     case 0xc000: //Set register to bitwise and between value and random number
       vm.registers[register] = opcode & 0x00ff & randomByte();
@@ -303,9 +302,11 @@ export function memory(opcode: number, vm: VM) {
     /**
      * Set address register to location of the font sprite. Font sprites are
      * loaded by the interpreter to 0x0 and onwards with 5 bytes of allocated
-     * for each font. The second nibble of the opcode identifies the font.
+     * for each font. The second nibble of the opcode identifies the register
+     * which stores the requested font.
      */
-    const font = nibble(opcode).second();
+    const register = nibble(opcode).second();
+    const font = vm.registers[register];
     vm.address = font * 5;
   } else {
     throw new OpcodeError(
