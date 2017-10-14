@@ -4,7 +4,7 @@ import { OpcodeError, StackError } from "./errors";
 
 /** Max values for 8-bit and 16-bit unsigned integers - used for carry flags */
 const EIGHT_BIT_WRAP = 0x100;
-const SIXTEEN_BIT_WRAP = 0x10000;
+const SIXTEEN_BIT_WRAP = 0x1000;
 
 /**
  * Decodes instructions related to conditional skipping and updates the state
@@ -167,7 +167,6 @@ export function betweenRegisters(opcode: number, vm: VM) {
   switch (operation) {
     case 0x0: //Assign register y to register x (0x8xy0)
       vm.registers[register1] = vm.registers[register2];
-
       break;
     case 0x1: //Assign register x | register y to register x
       vm.registers[register1] =
@@ -262,6 +261,8 @@ export function memory(opcode: number, vm: VM) {
     //Add register value to address register I
     const register = nibble(opcode).second();
     const newAddress = vm.address + vm.registers[register];
+    //Mark register register flow in register f
+    vm.registers[0xf] = newAddress >= SIXTEEN_BIT_WRAP ? 1 : 0;
     vm.address = newAddress % SIXTEEN_BIT_WRAP;
   } else if (nibble(opcode).without.second() === 0xf055) {
     /**

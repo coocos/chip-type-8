@@ -19,6 +19,9 @@ export default class VM {
   /** Sixteen 8-bit registers named V0 to VF */
   readonly registers: Uint8Array;
 
+  /** HP48 flags - used by Super Chip-48 only */
+  readonly flags: Uint8Array;
+
   /**
    * CHIP-8 has 4 kilobytes of memory, but the the first 512
    * bytes are traditionally reserved for the interpreter itself
@@ -47,6 +50,7 @@ export default class VM {
 
   constructor(display: Display, input: Input = new Input()) {
     this.registers = new Uint8Array(16);
+    this.flags = new Uint8Array(8);
     this.memory = new Uint8Array(0x1000);
     this.counter = ROM_START;
     this.address = 0;
@@ -181,6 +185,18 @@ export default class VM {
           case 0x55: //Copy registers to memory
           case 0x65: //Load registers from memory
             instructions.memory(opcode, this);
+            break;
+          case 0x75: //HP48 instruction only - store registers to flags
+            for (let i = 0; i <= nibble(opcode).second(); i++) {
+              this.flags[i] = this.registers[i];
+            }
+            this.incrementCounter();
+            break;
+          case 0x85: //HP48 instruction only - load registers from flags
+            for (let i = 0; i <= nibble(opcode).second(); i++) {
+              this.registers[i] = this.flags[i];
+            }
+            this.incrementCounter();
             break;
           default:
             throw new OpcodeError(
