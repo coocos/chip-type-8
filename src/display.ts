@@ -1,4 +1,12 @@
 export default class Display {
+  /** The display wraps after 64 pixels horizontally and 32 pixels vertically */
+  private static HORIZONTAL_WRAP = 64;
+  private static VERTICAL_WRAP = 32;
+
+  /** Set pixels are white, background pixels are black */
+  private static BACKGROUND_COLOR = "rgb(0, 0, 0)";
+  private static FOREGROUND_COLOR = "rgb(255, 255, 255)";
+
   /** Canvas, i.e. drawing surface */
   canvas: HTMLCanvasElement;
 
@@ -12,16 +20,17 @@ export default class Display {
    * Constructs display by finding the corresponding element from DOM
    * and constructs a two-dimensional context for sprite opertaions
    * @param {string} domElement Identifier of the canvas DOM element
+   * @param {number} scale Screen scaling factor
    * @returns {Display} Display
    */
-  constructor(domElement: string) {
+  constructor(domElement: string, scale: number = 8) {
     this.canvas = <HTMLCanvasElement>document.querySelector(domElement);
     if (!this.canvas) {
       throw new Error(`Failed to find ${domElement} in DOM`);
     }
     this.context = this.canvas.getContext("2d")!;
     this.clear();
-    this.scale = 1;
+    this.scale = scale;
   }
 
   /**
@@ -41,25 +50,29 @@ export default class Display {
    */
   drawSprite(x1: number, y1: number, bytes: Uint8Array): boolean {
     let pixelsFlipped = false;
-    for (let [y, _byte] of bytes.entries()) {
-      for (let x = 0; x < 8; x++) {
-        //Extract the next bit / pixel from the byte
-        const bit = (_byte >> x) & 0x1;
+    for (let [y2, _byte] of bytes.entries()) {
+      //Loop through each bit in the byte - each bit is a single horizontal pixel
+      for (let x2 = 0; x2 < 8; x2++) {
+        const bit = (_byte >> x2) & 0x1;
         //Only set bits / pixels are drawn - unset bits are ignored
         if (bit) {
+          //X coordinate is the starting x coordinate + bit offset
+          let x = (x1 + (7 - x2)) % Display.HORIZONTAL_WRAP;
+          //Final y coordinate is the starting y coordinate + byte offset
+          let y = (y1 + y2) % Display.VERTICAL_WRAP;
+
           //If pixel is already set it needs to be flipped
-          if (
-            this.isPixelSet((x1 + (7 - x)) * this.scale, (y1 + y) * this.scale)
-          ) {
+          if (this.isPixelSet(x * this.scale, y * this.scale)) {
             pixelsFlipped = true;
-            this.context.fillStyle = "rgb(0, 0, 0)";
+            this.context.fillStyle = Display.BACKGROUND_COLOR;
           } else {
-            this.context.fillStyle = "rgb(255, 255, 255)";
+            this.context.fillStyle = Display.FOREGROUND_COLOR;
           }
+
           //Fill pixel
           this.context.fillRect(
-            (x1 + (7 - x)) * this.scale,
-            (y1 + y) * this.scale,
+            x * this.scale,
+            y * this.scale,
             1 * this.scale,
             1 * this.scale
           );
@@ -77,7 +90,7 @@ export default class Display {
    * @param {number} y Pixel y coordinate
    * @returns {boolean} True if pixel is set, false if not
    */
-  public isPixelSet(x: number, y: number): boolean {
+  isPixelSet(x: number, y: number): boolean {
     const pixel = this.context.getImageData(x, y, 1, 1);
     return pixel.data[0] > 0;
   }
