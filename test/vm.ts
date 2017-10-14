@@ -195,26 +195,36 @@ describe("Virtual machine", () => {
       expect(vm.registers[0xa]).to.equal(0xff);
       expect(vm.registers[0xf]).to.equal(0x0);
     });
-    it("should shift register right by one bit and assign it to another register", () => {
-      const vm = initializeVm([0x6bee, 0x8ab6, 0x6bff, 0x8ab6]);
-      //Shift value register VB to the right by 1 bit and and store it in register
-      //VA - set register VF to the least significant bit before the shift
+    it("should shift register right by one bit", () => {
+      const vm = initializeVm([
+        0x6bee, //Store 0xEE in register VB (least significant bit is 0)
+        0x8bb6, //Shift register VB right by one bit
+        0x6bff, //Store 0xFF in register VB (least significant bit is 1)
+        0x8bb6 //Shift register VB right by one bit
+      ]);
+      //Register VB should be shifted right and register VF should be 0
       times(2, () => vm.next());
-      expect(vm.registers[0xa]).to.equal(0x77);
+      expect(vm.registers[0xb]).to.equal(0x77);
       expect(vm.registers[0xf]).to.equal(0x0);
+      //Register VB should be shifted right and register VF should be 1
       times(2, () => vm.next());
-      expect(vm.registers[0xa]).to.equal(0x7f);
+      expect(vm.registers[0xb]).to.equal(0x7f);
       expect(vm.registers[0xf]).to.equal(0x1);
     });
-    it("should shift register left by one bit and assign it to another register", () => {
-      const vm = initializeVm([0x6bee, 0x8abe, 0x6b7f, 0x8abe]);
-      //Shift value register VB to the left by 1 bit and and store it in register
-      //VA - set register VF to the most significant bit before the shift
+    it("should shift register left by one bit", () => {
+      const vm = initializeVm([
+        0x6bee, //Store 0xEE in register VB (most significant bit is 1)
+        0x8bbe, //Shift register VB left by one bit
+        0x6b7f, //Store 0x7F in register VB (most significant bit is 0)
+        0x8bbe //Shift register VB left by one bit
+      ]);
+      //Register VB should be shifted left and register VF should be 1
       times(2, () => vm.next());
-      expect(vm.registers[0xa]).to.equal(0xdc);
+      expect(vm.registers[0xb]).to.equal(0xdc);
       expect(vm.registers[0xf]).to.equal(0x1);
+      //Register VB should be shifted left and register VF should be 0
       times(2, () => vm.next());
-      expect(vm.registers[0xa]).to.equal(0xfe);
+      expect(vm.registers[0xb]).to.equal(0xfe);
       expect(vm.registers[0xf]).to.equal(0x0);
     });
   });

@@ -193,10 +193,14 @@ export function betweenRegisters(opcode: number, vm: VM) {
       vm.registers[0xf] = sub < 0 ? 0 : 1;
       break;
     case 0x6:
-      //Shift value of register y right by one bit and assign it to register x
-      //Store the least significant bit of register y in VF
-      vm.registers[register1] = vm.registers[register2] >> 1;
-      vm.registers[0xf] = vm.registers[register2] & 0x1;
+      /**
+       * This should shift value of register y right by one bit and assign it
+       * to register x. However it seems like most implementations actually
+       * just shift the register x right by one bit and store the least
+       * significant bit prior to the sift in register VF.
+       */
+      vm.registers[0xf] = vm.registers[register1] & 0x1;
+      vm.registers[register1] = vm.registers[register1] >> 1;
       break;
     case 0x7: //Subtract register x from register y and assign to register x
       sub = vm.registers[register2] - vm.registers[register1];
@@ -205,10 +209,14 @@ export function betweenRegisters(opcode: number, vm: VM) {
       vm.registers[0xf] = sub < 0 ? 0 : 1;
       break;
     case 0xe:
-      //Shift value of register y left by one bit and assign it to register x
-      //Store the most significant bit of register y in VF
-      vm.registers[register1] = (vm.registers[register2] << 1) & 0xff;
-      vm.registers[0xf] = vm.registers[register2] >> 7;
+      /**
+       * This should shift value of register y left by one bit and assign it
+       * to register x. However it seems like most implementations actually
+       * just shift the register y left by one bit and store the most
+       * significant bit prior to the shift in register VF.
+       */
+      vm.registers[0xf] = vm.registers[register1] >> 7;
+      vm.registers[register1] = (vm.registers[register1] << 1) & 0xff;
       break;
     default:
       throw new OpcodeError(
