@@ -17,7 +17,7 @@ describe("Display", () => {
   it("should draw a sprite", () => {
     //Initialize stubs, spies and construct display
     (<any>global).document = stubCanvas();
-    const display = new Display("#display");
+    const display = new Display("#display", 1);
     sinon.spy(display.context, "fillRect");
 
     //Draw two rows of sprite data and check that the internal draw calls were made
