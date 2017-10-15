@@ -21,7 +21,9 @@ export function bcd(value: number): Array<number> {
  * @returns {string} Opcode as a hexadecimal string
  */
 export function prettyPrint(opcode: number): string {
-  return `0x${opcode.toString(16).toUpperCase()}`;
+  let hex = opcode.toString(16).toUpperCase();
+  //Pad the number to 4 characters with leading zeroes
+  return `0x${("0000" + hex).slice(-4)}`;
 }
 
 /**
@@ -32,8 +34,14 @@ export function randomByte(): number {
   return Math.round(Math.random() * 255);
 }
 
-/** Nibbler defines methods for extracting nibbles from a 16-bit opcodes */
-class Nibbler {
+/** Helpers for manipulating nibbles of 16-bit opcodes */
+interface Nibbles {
+  first(): number;
+  second(): number;
+  third(): number;
+  fourth(): number;
+}
+class Nibbler implements Nibbles {
   private bytes: number;
   /**
    * Constructs Nibbler
@@ -63,7 +71,7 @@ class Nibbler {
    * new Nibbler(opcode).without.first() then the first() method
    * will return the opcode with the first nibble set to zero.
    */
-  get without() {
+  get without(): Nibbles {
     const bytes = this.bytes;
     return {
       /** Returns the opcode with the first nibble set to zero */
