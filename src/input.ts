@@ -1,6 +1,6 @@
 //Map CHIP-8 keyboard to a modern keyboard
 //prettier-ignore
-const keyMap: { [index: string]: string } = {
+export const keyMap: { [index: string]: string } = {
     '1': '1',
     '2': '2',
     '3': '3',

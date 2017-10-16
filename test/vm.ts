@@ -83,6 +83,27 @@ describe("Virtual machine", () => {
       vm.next();
       expect(vm.counter).to.equal(0x20e);
     });
+    it("should wait until a key is pressed before proceeding", () => {
+      const vm = initializeVm([
+        0x6a0f, //Assign 0xF to register VA
+        0xfa0a //Wait for input and store it to register VA
+      ]);
+      const keys = stubKeys();
+      //Store value in register and then wait for input
+      times(2, () => vm.next());
+      expect(vm.counter).to.equal(0x202);
+      expect(vm.registers[0xa]).to.equal(0xf);
+      //Executing more instructions should not modify the state of the virtual
+      //machine as the virtual machine is still waiting for input
+      times(10, () => vm.next());
+      expect(vm.counter).to.equal(0x202);
+      expect(vm.registers[0xa]).to.equal(0xf);
+      //Pressing a key should advance the virtual machine
+      document.dispatchEvent(<KeyboardEvent>{ type: "keydown", key: "v" });
+      vm.next();
+      expect(vm.registers[0xa]).to.equal(0xf);
+      expect(vm.counter).to.equal(0x204);
+    });
   });
   describe("register instruction", () => {
     it("should set value to register", () => {

@@ -1,6 +1,7 @@
 import VM from "./vm";
 import { prettyPrint, randomByte, nibble, bcd } from "./utils";
 import { OpcodeError, StackError } from "./errors";
+import { keyMap } from "./input";
 
 /** Max values for 8-bit and 16-bit unsigned integers - used for carry flags */
 const EIGHT_BIT_WRAP = 0x100;
@@ -380,6 +381,17 @@ export function input(opcode: number, vm: VM) {
   const register = nibbles.second();
   const key = vm.registers[register];
   switch (identifier) {
+    case 0xf00a:
+      vm.waitingForInput = true;
+      //If any key is pressed then the virtual machine can proceed
+      for (let currentKey of Object.keys(keyMap)) {
+        if (vm.isKeyPressed(keyMap[currentKey])) {
+          vm.waitingForInput = false;
+          vm.incrementCounter();
+          break;
+        }
+      }
+      break;
     case 0xe0a1:
       /**
        * If the key stored in register is currently not pressed then

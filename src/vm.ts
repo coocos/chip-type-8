@@ -48,6 +48,9 @@ export default class VM {
   delayTimer: number;
   soundTimer: number;
 
+  /** Is virtual machine waiting for input before proceeding */
+  waitingForInput: boolean;
+
   constructor(display: Display, input: Input = new Input()) {
     this.registers = new Uint8Array(16);
     this.flags = new Uint8Array(8);
@@ -59,6 +62,7 @@ export default class VM {
     this.soundTimer = 0;
     this.display = display;
     this.input = input;
+    this.waitingForInput = false;
     this.loadFonts();
   }
 
@@ -91,11 +95,19 @@ export default class VM {
    * ~600 instructions per second.
    */
   tick() {
-    if (this.delayTimer > 0) {
-      this.delayTimer--;
-    }
-    if (this.soundTimer > 0) {
-      this.soundTimer--;
+    /**
+     * Timers are only decremented if virtual machine is not waiting for an
+     * input event. It's safe to try to execute instructions even when waiting
+     * for an input as the program counter will not move beyond the instruction
+     * which waits for the input.
+     */
+    if (!this.waitingForInput) {
+      if (this.delayTimer > 0) {
+        this.delayTimer--;
+      }
+      if (this.soundTimer > 0) {
+        this.soundTimer--;
+      }
     }
     //Execute multiple instructions
     for (let _ = 0; _ < Math.round(CLOCKSPEED / 60); _++) {
@@ -174,6 +186,9 @@ export default class VM {
       case 0xf000: //Contains a myriad of instructions
         let operation = opcode & 0x00ff;
         switch (operation) {
+          case 0x0a: //Wait for input
+            instructions.input(opcode, this);
+            break;
           case 0x07: //Assign delay timer value to register
           case 0x15: //Assign register value to delay timer
           case 0x18: //Assign register value to sound timer
