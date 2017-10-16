@@ -128,7 +128,7 @@ export default class VM {
   }
 
   /** Returns whether input key is pressed */
-  isKeyPressed(key: string) {
+  isKeyPressed(key: number) {
     return this.input.isPressed(key);
   }
 

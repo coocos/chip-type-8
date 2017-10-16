@@ -1,27 +1,27 @@
 //Map CHIP-8 keyboard to a modern keyboard
 //prettier-ignore
-export const keyMap: { [index: string]: string } = {
-    '1': '1',
-    '2': '2',
-    '3': '3',
-    '4': '12',
-    'q': '4',
-    'w': '5',
-    'e': '6',
-    'r': '13',
-    'a': '7',
-    's': '8',
-    'd': '9',
-    'f': '14',
-    'z': '10',
-    'x': '0',
-    'c': '11',
-    'v': '15'
+export const keyMap: { [index: string]: number } = {
+    '1': 1,
+    '2': 2,
+    '3': 3,
+    '4': 0xc,
+    'q': 4,
+    'w': 5,
+    'e': 6,
+    'r': 0xd,
+    'a': 7,
+    's': 8,
+    'd': 9,
+    'f': 0xe,
+    'z': 0xa,
+    'x': 0,
+    'c': 0xb,
+    'v': 0xf
 }
 
 export default class Input {
   /** Currently pressed keys */
-  private activeKeys: Set<string>;
+  private activeKeys: Set<number>;
 
   /**
    * Constructs the input handler and handles key presses accordingly
@@ -29,7 +29,7 @@ export default class Input {
    * @return {Input} Input handler
    */
   constructor(element: Element | Document = document) {
-    this.activeKeys = new Set<string>();
+    this.activeKeys = new Set<number>();
     element.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key in keyMap) {
         this.activeKeys.add(keyMap[e.key]);
@@ -48,7 +48,7 @@ export default class Input {
    * @param {string} key Name of the input key
    * @return {boolean} True if key is pressed, false if not
    */
-  isPressed(key: string): boolean {
+  isPressed(key: number): boolean {
     return this.activeKeys.has(key);
   }
 }

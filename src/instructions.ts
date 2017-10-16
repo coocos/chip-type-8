@@ -397,7 +397,7 @@ export function input(opcode: number, vm: VM) {
        * If the key stored in register is currently not pressed then
        * skip the following instruction
        */
-      if (!vm.isKeyPressed(String(key))) {
+      if (!vm.isKeyPressed(key)) {
         vm.incrementCounter();
       }
       vm.incrementCounter();
@@ -407,7 +407,7 @@ export function input(opcode: number, vm: VM) {
        * If the key stored in register is currently pressed then
        * skip the following instruction
        */
-      if (vm.isKeyPressed(String(key))) {
+      if (vm.isKeyPressed(key)) {
         vm.incrementCounter();
       }
       vm.incrementCounter();
