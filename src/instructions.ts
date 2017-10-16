@@ -387,6 +387,7 @@ export function input(opcode: number, vm: VM) {
       for (let currentKey of Object.keys(keyMap)) {
         if (vm.isKeyPressed(keyMap[currentKey])) {
           vm.waitingForInput = false;
+          vm.registers[register] = keyMap[currentKey];
           vm.incrementCounter();
           break;
         }

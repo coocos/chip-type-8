@@ -99,9 +99,9 @@ describe("Virtual machine", () => {
       expect(vm.counter).to.equal(0x202);
       expect(vm.registers[0xa]).to.equal(0xf);
       //Pressing a key should advance the virtual machine
-      document.dispatchEvent(<KeyboardEvent>{ type: "keydown", key: "v" });
+      document.dispatchEvent(<KeyboardEvent>{ type: "keydown", key: "a" });
       vm.next();
-      expect(vm.registers[0xa]).to.equal(0xf);
+      expect(vm.registers[0xa]).to.equal(0x7);
       expect(vm.counter).to.equal(0x204);
     });
   });
