@@ -385,8 +385,8 @@ describe("Virtual machine", () => {
       }
       //Check that the memory beyond the register area was not filled
       expect(vm.memory[0x310]).to.equal(0x0);
-      //Check that address register has been incremented by 1 for each copied register
-      expect(vm.address).to.equal(0x310);
+      //Check that address register has not been incremented
+      expect(vm.address).to.equal(0x300);
     });
     it("should load registers from memory starting at address in register I", () => {
       //Generate unique values for all registers - these should be loaded into registers
@@ -409,8 +409,8 @@ describe("Virtual machine", () => {
       for (let register = 0; register <= 0xf; register++) {
         expect(vm.registers[register]).to.equal(register);
       }
-      //Address register should have been incremented by the number of registers
-      expect(vm.address).to.equal(0x218);
+      //Address register should not have been incremented
+      expect(vm.address).to.equal(0x208);
     });
     it("should store register value as binary-coded decimal in memory", () => {
       /**

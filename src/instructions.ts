@@ -281,9 +281,9 @@ export function memory(opcode: number, vm: VM) {
      * 0 to A to memory starting from the address stored in address register I.
      */
     const lastRegister = nibble(opcode).second();
+    let address = vm.address;
     for (let register = 0; register <= lastRegister; register++) {
-      vm.memory[vm.address] = vm.registers[register];
-      vm.address++;
+      vm.memory[address++] = vm.registers[register];
     }
   } else if (nibble(opcode).without.second() === 0xf065) {
     /**
@@ -292,9 +292,9 @@ export function memory(opcode: number, vm: VM) {
      * second byte of the instruction.
      */
     const lastRegister = nibble(opcode).second();
+    let address = vm.address;
     for (let register = 0; register <= lastRegister; register++) {
-      vm.registers[register] = vm.memory[vm.address];
-      vm.address++;
+      vm.registers[register] = vm.memory[address++];
     }
   } else if (nibble(opcode).without.second() === 0xf033) {
     /**
