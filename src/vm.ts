@@ -8,13 +8,6 @@ import Input from "./input";
 /** ROMs loaded to memory start at 512 bytes in so at 0x200 */
 const ROM_START = 0x200;
 
-/**
- * Clock speed for executing instructions. CHIP-8 does not have a specified
- * clock speed but executing 500 - 600 instructions per second is said to
- * to provide a decent experience.
- */
-const CLOCKSPEED = 600;
-
 export default class VM {
   /** Sixteen 8-bit registers named V0 to VF */
   readonly registers: Uint8Array;
@@ -38,6 +31,13 @@ export default class VM {
   /** Input handler */
   readonly input: Input;
 
+  /**
+   * Clock speed for executing instructions. CHIP-8 does not have a specified
+   * clock speed but executing 500 - 600 instructions per second is said to
+   * to provide a decent experience.
+   */
+  clockSpeed: number;
+
   /** Program counter, i.e. the current instruction address */
   counter: number;
 
@@ -57,6 +57,7 @@ export default class VM {
     this.memory = new Uint8Array(0x1000);
     this.counter = ROM_START;
     this.address = 0;
+    this.clockSpeed = 600;
     this.stack = [];
     this.delayTimer = 0;
     this.soundTimer = 0;
@@ -109,8 +110,9 @@ export default class VM {
         this.soundTimer--;
       }
     }
-    //Execute multiple instructions
-    for (let _ = 0; _ < Math.round(CLOCKSPEED / 60); _++) {
+    //Execute multiple instructions each frame @ 60 frames per second
+    const opsPerSec = Math.round(this.clockSpeed / 60);
+    for (let opcode = 0; opcode < opsPerSec; opcode++) {
       this.next();
     }
   }
@@ -127,7 +129,10 @@ export default class VM {
     this.counter += 2;
   }
 
-  /** Returns whether input key is pressed */
+  /**
+   * Returns whether input key is pressed
+   * @param {number} key Input key as a CHIP-8 keyboard key from 0x0 to 0xF
+   */
   isKeyPressed(key: number) {
     return this.input.isPressed(key);
   }
