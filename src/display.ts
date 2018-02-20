@@ -19,18 +19,30 @@ export default class Display {
   /**
    * Constructs display by finding the corresponding element from DOM
    * and constructs a two-dimensional context for sprite opertaions
-   * @param {string} domElement Identifier of the canvas DOM element
+   * @param {string | HTMLCanvasElement} domElement DOM identifier or element for canvas
    * @param {number} scale Screen scaling factor
    * @returns {Display} Display
    */
-  constructor(domElement: string, scale: number = 8) {
-    this.canvas = <HTMLCanvasElement>document.querySelector(domElement);
-    if (!this.canvas) {
-      throw new Error(`Failed to find ${domElement} in DOM`);
+  constructor(domElement: string | HTMLCanvasElement, scale: number = 8) {
+    if (this.isCanvas(domElement)) {
+      this.canvas = domElement;
+      this.scale = Math.round(domElement.clientWidth / Display.HORIZONTAL_WRAP);
+    } else {
+      this.canvas = <HTMLCanvasElement>document.querySelector(domElement);
+      this.scale = scale;
+      if (!this.canvas) {
+        throw new Error(`Failed to find ${domElement} in DOM`);
+      }
     }
     this.context = this.canvas.getContext("2d")!;
     this.clear();
-    this.scale = scale;
+  }
+
+  /** Type guard for checking whether canvas is DOM identifier or DOM element */
+  private isCanvas(
+    canvas: string | HTMLCanvasElement
+  ): canvas is HTMLCanvasElement {
+    return (<HTMLCanvasElement>canvas).getContext !== undefined;
   }
 
   /**

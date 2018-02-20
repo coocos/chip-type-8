@@ -66,9 +66,25 @@ export default class VM {
     this.loadFonts();
   }
 
-  /** Load font sprite data to memory. Fonts are placed in a memory location
-   * that applications won't use - the very beginning of the memory space.
-   */
+  /** Reset the state of the virtual machine */
+  reset() {
+    this.registers.fill(0);
+    this.flags.fill(0);
+    this.memory.fill(0);
+    while (this.stack.length) {
+      this.stack.pop();
+    }
+    this.counter = ROM_START;
+    this.delayTimer = 0;
+    this.soundTimer = 0;
+    this.waitingForInput = false;
+    this.loadFonts();
+  }
+
+  /**
+  * Load font sprite data to memory. Fonts are placed in a memory location
+  * that applications won't use - the very beginning of the memory space.
+  */
   private loadFonts() {
     const fontData = getFontSprites();
     for (let address = 0; address < fontData.length; address++) {

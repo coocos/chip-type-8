@@ -27,3 +27,9 @@ export async function loadRom(): Promise<Uint8Array> {
     }
   });
 }
+
+export function loadRomRef(name: string): any {
+  return fetch(name)
+    .then(data => data.arrayBuffer())
+    .then(romBuffer => new Uint8Array(romBuffer));
+}
