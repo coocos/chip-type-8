@@ -21,8 +21,8 @@ const Key: React.StatelessComponent<KeyProps> = props => {
   return (
     <button
       className={className}
-      onMouseDown={() => props.pressKey(props.name, true)}
-      onMouseUp={() => props.pressKey(props.name, false)}
+      onTouchStart={() => props.pressKey(props.name, true)}
+      onTouchEnd={() => props.pressKey(props.name, false)}
     >
       {props.name}
     </button>
