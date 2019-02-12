@@ -2,6 +2,18 @@
   background: #5dcb9a;
 }
 
+.container {
+  background: #282c38;
+  width: 100%;
+  display: flex;
+}
+
+@media screen and (max-width: 720px) {
+  .container {
+      flex-direction: column;
+  }
+}
+
 .darkBackground {
   background: #282c38;
 }

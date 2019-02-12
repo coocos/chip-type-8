@@ -26,7 +26,7 @@ export default class Display {
   constructor(domElement: string | HTMLCanvasElement, scale: number = 8) {
     if (this.isCanvas(domElement)) {
       this.canvas = domElement;
-      this.scale = Math.round(domElement.clientWidth / Display.HORIZONTAL_WRAP);
+      this.scale = Math.floor(domElement.clientWidth / Display.HORIZONTAL_WRAP);
     } else {
       this.canvas = <HTMLCanvasElement>document.querySelector(domElement);
       this.scale = scale;

@@ -8,27 +8,18 @@ import * as ui from "./ui";
 import App from "./components/app";
 
 let vm: VM;
-
-interface romCache {
-  [name: string]: Uint8Array;
-}
-const cache: romCache = {};
-
-const state = {
-  selectedRom: "INVADERS",
-  roms: ["BLINKY", "INVADERS", "PONG"]
-};
+const ACTIVE_ROM = "INVADERS";
 
 /** Kickstarts the interpreter after a ROM has been selected */
 function boot(canvas: HTMLCanvasElement) {
   const display = new Display(canvas);
   vm = new VM(display);
-  render(state);
+  loadRom(ACTIVE_ROM);
+  render();
 }
 
 /** Loads a ROM to the VM */
 function loadRom(rom: string) {
-  console.log(`VM should load "${rom}"`);
   vm.reset();
   ui.loadRomRef(rom).then((rom: Uint8Array) => {
     console.log(rom);
@@ -42,11 +33,11 @@ function runVm() {
   requestAnimationFrame(runVm);
 }
 
-function render(state: any) {
+function render() {
   ReactDOM.render(
-    <App setCanvas={boot} onLoadRom={loadRom} {...state} />,
+    <App setCanvas={boot} />,
     document.getElementById("container")
   );
 }
 
-render(state);
+render();
