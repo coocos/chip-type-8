@@ -1,5 +1,4 @@
-import * as Preact from "preact";
-const h = Preact.h;
+import { h, render } from "preact";
 
 import VM from "./vm";
 import Display from "./display";
@@ -11,7 +10,7 @@ let vm: VM;
 const ACTIVE_ROM = "INVADERS";
 
 /** Kickstarts the interpreter after a ROM has been selected */
-function boot(canvas: HTMLCanvasElement) {
+function startVm(canvas: HTMLCanvasElement) {
   const display = new Display(canvas);
   vm = new VM(display);
   loadRom(ACTIVE_ROM);
@@ -32,11 +31,11 @@ function runVm() {
   requestAnimationFrame(runVm);
 }
 
-function render() {
+function start() {
   const container = document.getElementById("container");
   if (container != null) {
-    Preact.render(<App setCanvas={boot} />, container);
+    render(<App setCanvas={startVm} />, container);
   }
 }
 
-render();
+start();

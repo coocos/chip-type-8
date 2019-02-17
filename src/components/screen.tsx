@@ -1,5 +1,4 @@
-import * as Preact from "preact";
-const h = Preact.h;
+import { h, Component } from "preact";
 
 const styles = require("./screen.css");
 
@@ -7,7 +6,7 @@ interface ScreenProps {
   setCanvas(canvas: HTMLCanvasElement): void;
 }
 
-export default class Screen extends Preact.Component<ScreenProps, {}> {
+export default class Screen extends Component<ScreenProps, {}> {
   private canvas: HTMLCanvasElement | null = null;
 
   /** Sets the canvas dimensions and sends the canvas element to the VM */
@@ -18,7 +17,6 @@ export default class Screen extends Preact.Component<ScreenProps, {}> {
       const height = this.canvas.clientHeight;
 
       // FIXME: The height and width should be a multiple of the CHIP-8 resolution
-
       this.canvas.width = width;
       this.canvas.height = height;
       this.props.setCanvas(this.canvas);

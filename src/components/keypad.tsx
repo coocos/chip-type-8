@@ -1,5 +1,4 @@
-import * as Preact from "preact";
-const h = Preact.h;
+import { h, FunctionalComponent, Component } from "preact";
 import { keyMap } from "../input";
 
 //ts-loader does not like CSS imports
@@ -15,7 +14,7 @@ interface KeyProps {
   name: string;
 }
 
-const Key: Preact.FunctionalComponent<KeyProps> = props => {
+const Key: FunctionalComponent<KeyProps> = props => {
   const className = props.pressed.has(keyMap[props.name])
     ? styles.pressedKey
     : styles.key;
@@ -30,7 +29,7 @@ const Key: Preact.FunctionalComponent<KeyProps> = props => {
   );
 };
 
-class Keypad extends Preact.Component<{}, KeypadState> {
+class Keypad extends Component<{}, KeypadState> {
   constructor() {
     super();
     this.state = {
@@ -59,9 +58,6 @@ class Keypad extends Preact.Component<{}, KeypadState> {
     });
   }
 
-  componentWillUnmount() {
-    //TODO: Remove the event listeners
-  }
   private pressKey(key: string, pressed: boolean = true) {
     const eventType = pressed ? "keydown" : "keyup";
     const event = new KeyboardEvent(eventType, { key });
