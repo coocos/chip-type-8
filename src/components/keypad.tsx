@@ -1,4 +1,5 @@
-import * as React from "react";
+import * as Preact from "preact";
+const h = Preact.h;
 import { keyMap } from "../input";
 
 //ts-loader does not like CSS imports
@@ -14,7 +15,7 @@ interface KeyProps {
   name: string;
 }
 
-const Key: React.StatelessComponent<KeyProps> = props => {
+const Key: Preact.FunctionalComponent<KeyProps> = props => {
   const className = props.pressed.has(keyMap[props.name])
     ? styles.pressedKey
     : styles.key;
@@ -29,7 +30,7 @@ const Key: React.StatelessComponent<KeyProps> = props => {
   );
 };
 
-class Keypad extends React.Component<{}, KeypadState> {
+class Keypad extends Preact.Component<{}, KeypadState> {
   constructor() {
     super();
     this.state = {

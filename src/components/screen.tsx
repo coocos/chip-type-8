@@ -1,4 +1,5 @@
-import * as React from "react";
+import * as Preact from "preact";
+const h = Preact.h;
 
 const styles = require("./screen.css");
 
@@ -6,8 +7,8 @@ interface ScreenProps {
   setCanvas(canvas: HTMLCanvasElement): void;
 }
 
-export default class Screen extends React.Component<ScreenProps, {}> {
-  private canvas: HTMLCanvasElement | null;
+export default class Screen extends Preact.Component<ScreenProps, {}> {
+  private canvas: HTMLCanvasElement | null = null;
 
   /** Sets the canvas dimensions and sends the canvas element to the VM */
   public componentDidMount() {

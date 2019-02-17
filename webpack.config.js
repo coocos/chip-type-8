@@ -9,10 +9,10 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js"]
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.css$/,
-        loader: ["style-loader"]
+        use: "style-loader"
       },
       {
         test: /\.css$/,
@@ -24,7 +24,7 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        loader: ["ts-loader"]
+        use: "ts-loader"
       }
     ]
   }

@@ -19,6 +19,10 @@ export const keyMap: { [index: string]: number } = {
     'v': 0xf
 }
 
+function isKeyboardEvent(e: Event): e is KeyboardEvent {
+  return "key" in e;
+}
+
 export default class Input {
   /** Currently pressed keys */
   private activeKeys: Set<number>;
@@ -30,15 +34,19 @@ export default class Input {
    */
   constructor(element: Element | Document = document) {
     this.activeKeys = new Set<number>();
-    element.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (e.key in keyMap) {
-        this.activeKeys.add(keyMap[e.key]);
+    element.addEventListener("keydown", (e: Event) => {
+      if (isKeyboardEvent(e)) {
+        if (e.key in keyMap) {
+          this.activeKeys.add(keyMap[e.key]);
+        }
       }
     });
-    element.addEventListener("keyup", (e: KeyboardEvent) => {
-      const key = keyMap[e.key];
-      if (this.activeKeys.has(key)) {
-        this.activeKeys.delete(key);
+    element.addEventListener("keyup", (e: Event) => {
+      if (isKeyboardEvent(e)) {
+        const key = keyMap[e.key];
+        if (this.activeKeys.has(key)) {
+          this.activeKeys.delete(key);
+        }
       }
     });
   }

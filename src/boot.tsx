@@ -1,5 +1,5 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as Preact from "preact";
+const h = Preact.h;
 
 import VM from "./vm";
 import Display from "./display";
@@ -15,7 +15,6 @@ function boot(canvas: HTMLCanvasElement) {
   const display = new Display(canvas);
   vm = new VM(display);
   loadRom(ACTIVE_ROM);
-  render();
 }
 
 /** Loads a ROM to the VM */
@@ -34,10 +33,10 @@ function runVm() {
 }
 
 function render() {
-  ReactDOM.render(
-    <App setCanvas={boot} />,
-    document.getElementById("container")
-  );
+  const container = document.getElementById("container");
+  if (container != null) {
+    Preact.render(<App setCanvas={boot} />, container);
+  }
 }
 
 render();

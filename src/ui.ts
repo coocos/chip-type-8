@@ -13,10 +13,8 @@ export async function loadRom(): Promise<Uint8Array> {
         const rom = romInput.files && romInput.files.item(0);
         if (rom) {
           const reader = new FileReader();
-
-          //TS typings are not aware of Event.target.result so type it explicitly
-          reader.onload = (e: Event & { target: { result: string } }) => {
-            const bytes = new Uint8Array((<any>e.target).result);
+          reader.onload = (e: Event) => {
+            const bytes = new Uint8Array(<ArrayBuffer>reader.result);
             resolve(bytes);
           };
           reader.readAsArrayBuffer(rom);
