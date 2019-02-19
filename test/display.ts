@@ -4,7 +4,7 @@ import * as sinon from "sinon";
 
 import { stubCanvas } from "./stubs";
 
-import Display from "../src/display";
+import Display from "../src/core/display";
 
 describe("Display", () => {
   it("should clear screen", () => {

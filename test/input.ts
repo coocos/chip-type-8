@@ -3,7 +3,7 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 
 import { stubKeys } from "./stubs";
-import Input from "../src/input";
+import Input from "../src/core/input";
 
 describe("Input", () => {
   it("should toggle key on and off", () => {

@@ -5,10 +5,10 @@ import * as _ from "lodash";
 
 import { stubCanvas, stubKeys } from "./stubs";
 
-import VM from "../src/vm";
-import Display from "../src/display";
-import Input from "../src/input";
-import * as utils from "../src/utils";
+import VM from "../src/core/vm";
+import Display from "../src/core/display";
+import Input from "../src/core/input";
+import * as utils from "../src/core/utils";
 
 /**
  * Initializes virtual machine with array of instructions

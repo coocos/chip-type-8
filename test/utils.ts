@@ -1,7 +1,7 @@
 import "mocha";
 import { expect } from "chai";
 
-import * as utils from "../src/utils";
+import * as utils from "../src/core/utils";
 
 describe("Binary-coded decimal conversion", () => {
   it("should convert values correctly", () => {

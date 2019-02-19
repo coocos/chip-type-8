@@ -1,5 +1,5 @@
 import { h, FunctionalComponent, Component } from "preact";
-import { keyMap } from "../input";
+import { keyMap } from "../core/input";
 
 //ts-loader does not like CSS imports
 const styles = require("./keypad.css");

@@ -83,9 +83,9 @@ export default class VM {
   }
 
   /**
-  * Load font sprite data to memory. Fonts are placed in a memory location
-  * that applications won't use - the very beginning of the memory space.
-  */
+   * Load font sprite data to memory. Fonts are placed in a memory location
+   * that applications won't use - the very beginning of the memory space.
+   */
   private loadFonts() {
     const fontData = getFontSprites();
     for (let address = 0; address < fontData.length; address++) {

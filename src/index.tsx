@@ -1,8 +1,8 @@
 import { h, render } from "preact";
 
-import VM from "./vm";
-import Display from "./display";
-import * as ui from "./ui";
+import VM from "./core/vm";
+import Display from "./core/display";
+import * as ui from "./core/ui";
 
 import App from "./components/app";
 
@@ -20,7 +20,6 @@ function startVm(canvas: HTMLCanvasElement) {
 function loadRom(rom: string) {
   vm.reset();
   ui.loadRomRef(rom).then((rom: Uint8Array) => {
-    console.log(rom);
     vm.load(rom);
     requestAnimationFrame(runVm);
   });

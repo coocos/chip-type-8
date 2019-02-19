@@ -1,5 +1,5 @@
 module.exports = {
-  entry: "./src/boot.tsx",
+  entry: "./src/index.tsx",
   output: {
     path: __dirname + "/dist",
     filename: "chip.js"
