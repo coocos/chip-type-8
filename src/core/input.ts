@@ -32,7 +32,7 @@ export default class Input {
    * @param {DOMElement}
    * @return {Input} Input handler
    */
-  constructor(element: Element | Document = document) {
+  public constructor(element: Element | Document = document) {
     this.activeKeys = new Set<number>();
     element.addEventListener("keydown", (e: Event) => {
       if (isKeyboardEvent(e)) {
@@ -56,7 +56,7 @@ export default class Input {
    * @param {string} key Name of the input key
    * @return {boolean} True if key is pressed, false if not
    */
-  isPressed(key: number): boolean {
+  public isPressed(key: number): boolean {
     return this.activeKeys.has(key);
   }
 }

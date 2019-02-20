@@ -13,7 +13,7 @@ const SIXTEEN_BIT_WRAP = 0x1000;
  * @param {number} opcode Opcode / instruction
  * @param {VM} vm Virtual machine
  */
-export function skip(opcode: number, vm: VM) {
+export function skip(opcode: number, vm: VM): void {
   const identifier = opcode & 0xf000;
   let register: number, register1: number, register2: number, value: number;
   switch (identifier) {
@@ -61,7 +61,7 @@ export function skip(opcode: number, vm: VM) {
  * @param {number} opcode Opcode / instruction
  * @param {VM} vm Virtual machine
  */
-export function subroutine(opcode: number, vm: VM) {
+export function subroutine(opcode: number, vm: VM): void {
   //The instruction for returning from a subroutine is the constant 0x00ee
   //but the other instructions here are not constants - this is just
   //a not-so-great workaround for handling the constant in the same
@@ -105,7 +105,7 @@ export function subroutine(opcode: number, vm: VM) {
  * @param {number} opcode Opcode / instruction
  * @param {VM} vm Virtual machine
  */
-export function jump(opcode: number, vm: VM) {
+export function jump(opcode: number, vm: VM): void {
   const identifier = opcode & 0xf000;
   switch (identifier) {
     case 0x1000: //Jump to address
@@ -131,7 +131,7 @@ export function jump(opcode: number, vm: VM) {
  * @param {number} opcode Opcode / instruction
  * @param {VM} vm Virtual machine
  */
-export function timer(opcode: number, vm: VM) {
+export function timer(opcode: number, vm: VM): void {
   const operation = opcode & 0x00ff;
   const register = nibble(opcode).second();
   switch (operation) {
@@ -159,7 +159,7 @@ export function timer(opcode: number, vm: VM) {
  * @param {number} opcode Opcode / instruction
  * @param {VM} vm Virtual machine
  */
-export function betweenRegisters(opcode: number, vm: VM) {
+export function betweenRegisters(opcode: number, vm: VM): void {
   const operation = opcode & 0x000f;
   const register1 = nibble(opcode).second();
   const register2 = nibble(opcode).third();
@@ -233,7 +233,7 @@ export function betweenRegisters(opcode: number, vm: VM) {
  * @param {number} opcode Opcode / instruction
  * @param {VM} vm Virtual machine
  */
-export function register(opcode: number, vm: VM) {
+export function register(opcode: number, vm: VM): void {
   const instruction = opcode & 0xf000;
   const register = nibble(opcode).second();
   const value = opcode & 0x00ff;
@@ -260,7 +260,7 @@ export function register(opcode: number, vm: VM) {
  * @param {number} opcode Opcode / instruction
  * @param {VM} vm Virtual machine
  */
-export function memory(opcode: number, vm: VM) {
+export function memory(opcode: number, vm: VM): void {
   const identifier = opcode & 0xf000;
 
   if (identifier === 0xa000) {
@@ -331,7 +331,7 @@ export function memory(opcode: number, vm: VM) {
  * @param {number} opcode Opcode / instruction
  * @param {VM} vm Virtual machine
  */
-export function display(opcode: number, vm: VM) {
+export function display(opcode: number, vm: VM): void {
   const nibbles = nibble(opcode);
   //Clear screen
   if (opcode === 0x00e0) {
@@ -375,7 +375,7 @@ export function display(opcode: number, vm: VM) {
  * @param {number} opcode Opcode / instruction
  * @param {VM} vm Virtual machine
  */
-export function input(opcode: number, vm: VM) {
+export function input(opcode: number, vm: VM): void {
   const nibbles = nibble(opcode);
   const identifier = nibbles.without.second();
   const register = nibbles.second();

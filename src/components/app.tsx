@@ -1,4 +1,4 @@
-import { h, FunctionalComponent } from "preact";
+import Preact, { h } from "preact";
 
 import Keypad from "./keypad";
 import Screen from "./screen";
@@ -10,7 +10,7 @@ interface Props {
   setCanvas(canvas: HTMLCanvasElement): void;
 }
 
-const App: FunctionalComponent<Props> = (props: Props) => {
+const App: Preact.FunctionalComponent<Props> = (props: Props) => {
   return (
     <div className={styles.container}>
       <Screen setCanvas={props.setCanvas} />

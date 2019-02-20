@@ -10,48 +10,48 @@ const ROM_START = 0x200;
 
 export default class VM {
   /** Sixteen 8-bit registers named V0 to VF */
-  readonly registers: Uint8Array;
+  public readonly registers: Uint8Array;
 
   /** HP48 flags - used by Super Chip-48 only */
-  readonly flags: Uint8Array;
+  public readonly flags: Uint8Array;
 
   /**
    * CHIP-8 has 4 kilobytes of memory, but the the first 512
    * bytes are traditionally reserved for the interpreter itself
    * so usually programs should be loaded starting from 0x200.
    */
-  readonly memory: Uint8Array;
+  public readonly memory: Uint8Array;
 
   /** Subroutine stack */
-  readonly stack: Array<number>;
+  public readonly stack: number[];
 
   /** Display used to render sprites */
-  readonly display: Display;
+  public readonly display: Display;
 
   /** Input handler */
-  readonly input: Input;
+  public readonly input: Input;
 
   /**
    * Clock speed for executing instructions. CHIP-8 does not have a specified
    * clock speed but executing 500 - 600 instructions per second is said to
    * to provide a decent experience.
    */
-  clockSpeed: number;
+  private clockSpeed: number;
 
   /** Program counter, i.e. the current instruction address */
-  counter: number;
+  public counter: number;
 
   /** 16-bit address register - often referred by just I */
-  address: number;
+  public address: number;
 
   /** Timers running at 60 hertz - will decrement until 0 */
-  delayTimer: number;
-  soundTimer: number;
+  public delayTimer: number;
+  public soundTimer: number;
 
   /** Is virtual machine waiting for input before proceeding */
-  waitingForInput: boolean;
+  public waitingForInput: boolean;
 
-  constructor(display: Display, input: Input = new Input()) {
+  public constructor(display: Display, input: Input = new Input()) {
     this.registers = new Uint8Array(16);
     this.flags = new Uint8Array(8);
     this.memory = new Uint8Array(0x1000);
@@ -68,7 +68,7 @@ export default class VM {
   }
 
   /** Reset the state of the virtual machine */
-  reset() {
+  public reset(): void {
     this.registers.fill(0);
     this.flags.fill(0);
     this.memory.fill(0);
@@ -86,7 +86,7 @@ export default class VM {
    * Load font sprite data to memory. Fonts are placed in a memory location
    * that applications won't use - the very beginning of the memory space.
    */
-  private loadFonts() {
+  private loadFonts(): void {
     const fontData = getFontSprites();
     for (let address = 0; address < fontData.length; address++) {
       this.memory[address] = fontData[address];
@@ -97,7 +97,7 @@ export default class VM {
    * Loads the array of bytes into memory and executes the instructions
    * @param {Uint8Array} array of bytes to load to memory
    */
-  load(bytes: Uint8Array) {
+  public load(bytes: Uint8Array): void {
     //Load ROM into memory starting at 0x200
     for (let [index, _byte] of bytes.entries()) {
       this.memory[ROM_START + index] = _byte;
@@ -111,7 +111,7 @@ export default class VM {
    * virtual machine a single tick will execute around 10 instructions, i.e.
    * ~600 instructions per second.
    */
-  tick() {
+  public tick(): void {
     /**
      * Timers are only decremented if virtual machine is not waiting for an
      * input event. It's safe to try to execute instructions even when waiting
@@ -134,14 +134,14 @@ export default class VM {
   }
 
   /** Fetches next instruction from memory and executes it */
-  next() {
+  public next(): void {
     this.execute(
       (this.memory[this.counter] << 8) | this.memory[this.counter + 1]
     );
   }
 
   /** Increment program counter by two memory slots / single opcode */
-  incrementCounter() {
+  public incrementCounter(): void {
     this.counter += 2;
   }
 
@@ -149,7 +149,7 @@ export default class VM {
    * Returns whether input key is pressed
    * @param {number} key Input key as a CHIP-8 keyboard key from 0x0 to 0xF
    */
-  isKeyPressed(key: number) {
+  public isKeyPressed(key: number): boolean {
     return this.input.isPressed(key);
   }
 
@@ -157,7 +157,7 @@ export default class VM {
    * Executes opcode and logs if the opcode is not identified
    * @param {number} opcode Opcode to be executed
    */
-  execute(opcode: number) {
+  public execute(opcode: number): void {
     //Most opcodes can be identified by the first nibble
     const identifier = opcode & 0xf000;
 

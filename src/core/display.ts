@@ -8,13 +8,13 @@ export default class Display {
   private static FOREGROUND_COLOR = "rgb(255, 255, 255)";
 
   /** Canvas, i.e. drawing surface */
-  canvas: HTMLCanvasElement;
+  public canvas: HTMLCanvasElement;
 
   /** Two-dimensional context for canvas */
-  context: CanvasRenderingContext2D;
+  public context: CanvasRenderingContext2D;
 
   /** Scaling factor of the screen */
-  scale: number;
+  public scale: number;
 
   /**
    * Constructs display by finding the corresponding element from DOM
@@ -23,12 +23,15 @@ export default class Display {
    * @param {number} scale Screen scaling factor
    * @returns {Display} Display
    */
-  constructor(domElement: string | HTMLCanvasElement, scale: number = 8) {
+  public constructor(
+    domElement: string | HTMLCanvasElement,
+    scale: number = 8
+  ) {
     if (this.isCanvas(domElement)) {
       this.canvas = domElement;
       this.scale = Math.floor(domElement.clientWidth / Display.HORIZONTAL_WRAP);
     } else {
-      this.canvas = <HTMLCanvasElement>document.querySelector(domElement);
+      this.canvas = document.querySelector(domElement) as HTMLCanvasElement;
       this.scale = scale;
       if (!this.canvas) {
         throw new Error(`Failed to find ${domElement} in DOM`);
@@ -42,7 +45,7 @@ export default class Display {
   private isCanvas(
     canvas: string | HTMLCanvasElement
   ): canvas is HTMLCanvasElement {
-    return (<HTMLCanvasElement>canvas).getContext !== undefined;
+    return (canvas as HTMLCanvasElement).getContext !== undefined;
   }
 
   /**
@@ -60,7 +63,7 @@ export default class Display {
    * @param {Uint8Array} bytes Sprite data as bytes
    * @returns {boolean} True if any pixels were flipped, false if not
    */
-  drawSprite(x1: number, y1: number, bytes: Uint8Array): boolean {
+  public drawSprite(x1: number, y1: number, bytes: Uint8Array): boolean {
     let pixelsFlipped = false;
     for (let [y2, _byte] of bytes.entries()) {
       //Loop through each bit in the byte - each bit is a single horizontal pixel
@@ -102,13 +105,13 @@ export default class Display {
    * @param {number} y Pixel y coordinate
    * @returns {boolean} True if pixel is set, false if not
    */
-  isPixelSet(x: number, y: number): boolean {
+  public isPixelSet(x: number, y: number): boolean {
     const pixel = this.context.getImageData(x, y, 1, 1);
     return pixel.data[0] > 0;
   }
 
   /** Clears the display */
-  clear() {
+  public clear(): void {
     this.context.fillStyle = Display.BACKGROUND_COLOR;
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }

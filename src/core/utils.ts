@@ -7,7 +7,7 @@
  * @param {number} value Number to encode
  * @returns {Array<number>} Binary-coded values
  */
-export function bcd(value: number): Array<number> {
+export function bcd(value: number): number[] {
   const hundreds = Math.floor(value / 100);
   const tens = Math.floor((value / 10) % 10);
   const ones = Math.floor((value % 100) % 10);
@@ -47,23 +47,23 @@ class Nibbler implements Nibbles {
    * Constructs Nibbler
    * @param {number} 16-bit opcode to nibble on
    */
-  constructor(bytes: number) {
+  public constructor(bytes: number) {
     this.bytes = bytes;
   }
   /** Returns the first nibble */
-  first(): number {
+  public first(): number {
     return (this.bytes & 0xf000) >> 12;
   }
   /** Returns the second nibble */
-  second(): number {
+  public second(): number {
     return (this.bytes & 0x0f00) >> 8;
   }
   /** Returns the third nibble */
-  third(): number {
+  public third(): number {
     return (this.bytes & 0x00f0) >> 4;
   }
   /** Returns the fourth nibble */
-  fourth(): number {
+  public fourth(): number {
     return this.bytes & 0x000f;
   }
   /**
@@ -71,7 +71,7 @@ class Nibbler implements Nibbles {
    * new Nibbler(opcode).without.first() then the first() method
    * will return the opcode with the first nibble set to zero.
    */
-  get without(): Nibbles {
+  public get without(): Nibbles {
     const bytes = this.bytes;
     return {
       /** Returns the opcode with the first nibble set to zero */
