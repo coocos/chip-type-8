@@ -1,12 +1,6 @@
-# Chip-type-8
+# chip-type-8
 
-## What is this?
-
-`Chip-type-8` is a [CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) interpreter / emulator written in TypeScript.
-
-## Why yet another interpreter?
-
-I mostly built this because a) I was interested in trying out TypeScript and b) I was interested in creating a super simple emulator.
+chip-type-8 is a [CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) interpreter / emulator written in TypeScript 🎮
 
 ## Features
 
@@ -20,11 +14,18 @@ No sound effects are supported.
 
 ## Tests
 
-Run `yarn test` to execute the tests for:
+Run `npm run test` to execute the tests for:
 
 * all 35 instructions
 * sanity checks for basic virtual machine operations
 * sprite drawing
+
+## Why yet another CHIP-8 interpreter?
+
+Hundreds, if not thousands of CHIP-8 interpreters exists so what makes this special? Well, nothing really - it's actually not that great compared to many other CHIP-8 interpreters. I made chip-type-8 because I was itching for a project which would allow me to do two things:
+
+* try out TypeScript (in 2017)
+* create a super simple emulator
 
 ## License
 
