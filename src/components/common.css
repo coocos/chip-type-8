@@ -1,7 +1,3 @@
-.focusBackground {
-  background: #5dcb9a;
-}
-
 .container {
   background: #282c38;
   width: 100%;
@@ -12,6 +8,10 @@
   .container {
       flex-direction: column;
   }
+}
+
+.focusBackground {
+  background: #5dcb9a;
 }
 
 .darkBackground {
