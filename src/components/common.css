@@ -1,3 +1,16 @@
+body {
+  font-size: 16px;
+  box-sizing: border-box;
+  margin: 0;
+  height: 100vh;
+  background: #282c38;
+}
+
+body > div {
+  display: flex;
+  padding: 1rem;
+}
+
 .container {
   background: #282c38;
   width: 100%;
