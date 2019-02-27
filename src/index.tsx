@@ -7,7 +7,9 @@ import * as ui from "./core/ui";
 import App from "./components/app";
 
 let vm: VM;
-const ACTIVE_ROM = "INVADERS";
+
+//Set by webpack to environment variable ACTIVE_ROM
+declare var ACTIVE_ROM: string;
 
 function runVm(): void {
   vm.tick();
