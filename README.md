@@ -1,6 +1,6 @@
 # chip-type-8
 
-[!ScreenShot](docs/screenshot.png)
+![chip-type-8](docs/screenshot.png)
 
 chip-type-8 is a [CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) interpreter / emulator built with TypeScript and [Preact](https://github.com/developit/preact)  🎮
 
