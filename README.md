@@ -12,12 +12,6 @@ No sound effects are supported, although the sound timer itself is implemented.
 
 ## Building
 
-The active ROM can be set at build time via an enviroment variable:
-
-```bash
-export ACTIVE_ROM='"INVADERS"'
-```
-
 To build the application via `webpack`:
 
 ```bash

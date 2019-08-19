@@ -8,9 +8,6 @@ import App from "./components/app";
 
 let vm: VM;
 
-//Set by webpack to environment variable ACTIVE_ROM
-declare var ACTIVE_ROM: string;
-
 function runVm(): void {
   vm.tick();
   requestAnimationFrame(runVm);
@@ -29,7 +26,14 @@ function loadRom(rom: string): void {
 function startVm(canvas: HTMLCanvasElement): void {
   const display = new Display(canvas);
   vm = new VM(display);
-  loadRom(ACTIVE_ROM);
+
+  //Load used ROM based on query string
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("rom")) {
+    loadRom(urlParams.get("rom") as string);
+  } else {
+    throw new Error("No ROM found in query string!");
+  }
 }
 
 function start(): void {

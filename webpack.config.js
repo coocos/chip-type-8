@@ -1,5 +1,3 @@
-const webpack = require("webpack");
-
 module.exports = {
   entry: "./src/index.tsx",
   output: {
@@ -29,10 +27,5 @@ module.exports = {
         use: "ts-loader"
       }
     ]
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      ACTIVE_ROM: process.env.ACTIVE_ROM
-    })
-  ]
+  }
 };
